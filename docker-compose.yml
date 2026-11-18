@@ -1,0 +1,93 @@
+# Radaric — self-host stack.
+#
+#   # one-time (and safe to re-run): creates/fills ./.env with hex secrets.
+#   # Hex, never base64 — a `+` or `/` inside POSTGRES_PASSWORD breaks the
+#   # DATABASE_URL built below. See SELF_HOSTING.md.
+#   sh scripts/generate-env.sh
+#   docker compose up -d --build
+#   (uses ./.env — don't point it at a local-dev .env: its DATABASE_URL etc. are
+#    overridden below, but any other key you add WILL be injected)
+#   open http://localhost:3000   → the first account you create becomes ADMIN,
+#                                  then add your AI key in Settings.
+#
+# The secrets are REQUIRED on purpose: a shipped default signing key would let
+# anyone on the network forge a session for any account. Compose refuses to
+# start until they are set — that is the point.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: radaric
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: radaric
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U radaric -d radaric"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  app:
+    build: .
+    restart: unless-stopped
+    # Every KEY=value in this file reaches the app container (OpenRouter,
+    # R2, Twitter, Resend, tuning caps…). The explicit `environment:` block
+    # below still wins where it sets the same key — so a dev DATABASE_URL in
+    # .env cannot override the compose one.
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    # The worker's shutdown budget is an 8s hard cap (with the GramJS destroy as
+    # a 3s slice inside it); Docker's default 10s is too close, so 15s. The
+    # entrypoint also WAITS for both children before exiting (a bare trap that
+    # exits immediately lets the kernel SIGKILL the namespace mid-drain).
+    stop_grace_period: 15s
+    ports:
+      - "3000:3000"
+    # Liveness covers BOTH processes: /api/health is the web tier, and 3001 is
+    # the worker — a dead GramJS listener stays green on the web probe alone.
+    # A fresh install with no Telegram answers 200 `status: "unconfigured"` on
+    # 3001, so a listener that was never configured is not a dead worker.
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"Promise.all([fetch('http://127.0.0.1:3000/api/health'),fetch('http://127.0.0.1:3001/health')]).then(([w,k])=>process.exit(w.ok&&k.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 5s
+      start_period: 90s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    environment:
+      DATABASE_URL: postgresql://radaric:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/radaric
+      # Required — see the header. Generate with: openssl rand -hex 32
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?set NEXTAUTH_SECRET in .env}
+      # Both default to localhost and both are overridable from .env. A domain
+      # deployment MUST set them: otherwise reset/verification links and webhook
+      # URLs point at the operator's own machine.
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      # Self-host defaults: every feature unlocked, and — with
+      # no mail transport configured — accounts are created already verified.
+      # Override from .env to sell subscriptions: SELF_HOSTED=false + the STRIPE_* keys.
+      SELF_HOSTED: ${SELF_HOSTED:-true}
+      # Empty keeps the default 1. Set ALLOW_UNVERIFIED_SIGNUP=0 to require email
+      # verification (needs RESEND_API_KEY + EMAIL_FROM).
+      ALLOW_UNVERIFIED_SIGNUP: ${ALLOW_UNVERIFIED_SIGNUP:-1}
+      # AI keys: set one here, or paste one in Settings after first login.
+      # OPENROUTER_API_KEY: sk-or-...
+      # ANTHROPIC_API_KEY: sk-ant-...
+      TWITTER_RATE_LIMIT_MS: ${TWITTER_RATE_LIMIT_MS:-5500}
+      NEXT_TELEMETRY_DISABLED: "1"
+
+volumes:
+  db-data:

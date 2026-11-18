@@ -1,0 +1,67 @@
+name: CI
+# The published repo's only workflow. Every path it touches must exist in this
+# tree — private-only files are stripped before publication, and the private
+# repo runs its own, separate workflows.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "postgresql://localhost:5432/test_db"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.4'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm audit --audit-level=high
+        continue-on-error: true
+      - run: npx tsc --noEmit
+      - run: npx vitest run --reporter=verbose
+      - run: npm run build
+        env:
+          CI: true
+  migrations:
+    # Applies every migration to an empty database, then asks Prisma whether the
+    # migration history and schema.prisma still agree. Any drift exits non-zero.
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: radaric
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/radaric"
+      SHADOW_DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/radaric_shadow"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.4'
+          cache: 'npm'
+      - run: npm ci
+      - name: Create the shadow database
+        run: PGPASSWORD=postgres psql -h localhost -U postgres -d postgres -c 'CREATE DATABASE radaric_shadow'
+      - name: Apply migrations to an empty database
+        run: npx prisma migrate deploy
+      - name: Migrations match schema.prisma
+        run: npx prisma migrate diff --from-migrations prisma/migrations --to-schema-datamodel prisma/schema.prisma --shadow-database-url "$SHADOW_DATABASE_URL" --exit-code

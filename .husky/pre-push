@@ -1,0 +1,8 @@
+# Pre-push: the full test suite and typecheck, plus a build on main.
+
+npm test || exit 1
+npx tsc --noEmit || exit 1
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ "$BRANCH" = "main" ]; then
+  npm run build || exit 1
+fi

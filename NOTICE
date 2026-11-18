@@ -1,0 +1,93 @@
+Radaric
+Copyright 2026 Kirill Oleinichenko
+
+This product is licensed under the Functional Source License, Version 1.1, ALv2
+Future License (FSL-1.1-ALv2). See LICENSE.
+
+It is **source-available**, not open source: FSL is not an OSI-approved
+license. You may read, run, modify and self-host the code — including inside a
+company — but you may not offer it to others as a commercial product or service
+that competes with Radaric (see "Permitted Purpose" in LICENSE).
+
+## Future license (the Change Date)
+
+FSL is per-version. Each version of the Software becomes available under the
+Apache License, Version 2.0 on the second anniversary (the "Change Date") of
+the date that version is first made available under FSL.
+
+- First public release: **2026-11-18**; its Change Date is **2028-11-18**.
+- Subsequent releases restate their Change Date in the release notes
+  (`docs/CHANGELOG.md`) when they are published.
+
+## Trademarks
+
+"Radaric", the Radaric logo and the domain `radaric.pro` are trademarks of the
+licensor. The FSL covers the **code**, not the name or the marks: a self-hosted
+or modified instance must not present itself as "Radaric" or imply endorsement,
+and may not use the logo or domain without written permission. Describing your
+instance as "a Radaric instance" or "based on Radaric" is fine.
+
+## Third-party fonts
+
+The font files under `app/fonts/` are not covered by the FSL. Each is
+distributed under the SIL Open Font License, Version 1.1, whose text sits next
+to it as `OFL.txt`; versions, upstream URLs and hashes are in
+`app/fonts/SOURCES.md`.
+
+- Inter — Copyright (c) 2016 The Inter Project Authors (https://github.com/rsms/inter)
+- Martian Mono — Copyright 2021 The Martian Mono Project Authors (https://github.com/evilmartians/mono)
+- Martian Grotesk — Copyright 2021 The Martian Grotesk Project Authors (https://github.com/evilmartians/grotesk)
+- PT Root UI — Copyright (c) 2018, Paratype Inc, Paratype Ltd, with Reserved
+  Font Name "PT Root UI VF" (https://github.com/paratype-fonts/free)
+- Golos Text — Copyright 2019 The Golos Text Project Authors
+  (https://github.com/googlefonts/golos-text)
+- IBM Plex Sans — Copyright © 2017 IBM Corp. with Reserved Font Name "Plex"
+- IBM Plex Mono — Copyright © 2017 IBM Corp. with Reserved Font Name "Plex"
+- JetBrains Mono — Copyright 2020 The JetBrains Mono Project Authors
+  (https://github.com/JetBrains/JetBrainsMono)
+
+SF Pro, SF Pro Rounded and SF Mono are Apple system fonts. They are not
+distributed with this product; the interface only requests them from the
+viewer's own device.
+
+## Screenshots
+
+The landing screenshots in `public/landing/` show a demo feed of public RSS
+sources. Article titles, cover images and other content visible in them belong
+to their publishers and are shown only to illustrate the product; they are not
+covered by this product's license.
+
+## Third-party code
+
+Two files contain code ported from the Intuition Design System (IDS),
+<https://github.com/intuition-tech/ids>:
+
+- `components/ui/hover-gallery.tsx` — a port of IDS's `.ids__inline-gallery`
+  (`css/components/promo-block.css` + `js/promo-block.js`);
+- `app/globals.css` — the IDS link treatment.
+
+Both are distributed under the MIT License, reproduced here in full:
+
+```text
+MIT License
+
+Copyright (c) 2025, Intuition Team, https://intuition.team/
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

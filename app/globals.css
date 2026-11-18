@@ -1,0 +1,1636 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "./typography.css";
+@plugin "@tailwindcss/typography";
+
+/* Dark mode is class-driven, not OS-driven: next-themes flips `.dark` on
+   <html> (attribute="class"). Tailwind v4 needs the variant declared in CSS —
+   it never reads tailwind.config.ts — or every `dark:` utility compiles to
+   `prefers-color-scheme` and an OS/app theme mismatch paints the wrong
+   palette (RAD-362: white prose headings and bold on a white card). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ===========================================================================
+   Radaric design system — green-forward refresh.
+
+   Engine: Radix Colors (Sage neutral + Grass green), hex/sRGB, 12-step scale.
+   Identity: green is the brand, not decoration. It carries identity and state.
+   Hierarchy through surface + restrained elevation, not borders.
+
+   Green model (the important part):
+   - --primary        : DEEP grass. Solid fills + green text on light. AA with
+                        white text (light) / near-black text (dark).
+   - --green-bright   : VIVID grass (#46a758 lineage). Non-text accents only —
+                        progress, status dots, glows, focus ring, selection.
+                        Floods the UI with green without contrast penalties.
+   Neutrals are intentionally green-tinted (Sage pushed greener). The app chrome
+   (sidebar / canvas) wears a soft green wash; content cards stay clean to read.
+   =========================================================================== */
+
+:root {
+  /* — Surfaces (light): green-tinted, layered ———————————————————————— */
+  --background: #ffffff;                /* app canvas: white (Notion-style). Cards separate via hairline + shadow, sidebar stays a gray panel. */
+  --foreground: #181c1a;               /* near-black ink */
+  --card: #ffffff;                     /* pure white content, lifts via hairline + shadow */
+  --card-foreground: #181c1a;
+  --popover: #ffffff;
+  --popover-foreground: #181c1a;
+  --secondary: #f0f1f3;                /* very light, clean UI element bg (inputs, soft fills) */
+  --secondary-foreground: #181c1a;
+  --muted: #f4f5f6;                    /* very light callout/plaque bg on white cards */
+  --muted-foreground: #5b6361;         /* low-contrast text — AA on canvas/secondary */
+  --accent: #e6e9e8;                   /* hover bg */
+  --accent-foreground: #181c1a;
+
+  /* Hairline — crisp 1px edge definition (cards, inputs, chrome).
+     Borderless hierarchy stays; this just lets edges read. */
+  --hairline: #16201a1f;               /* ~12% of ink */
+
+  /* — Brand green ————————————————————————————————————————————————————— */
+  --primary: #1f8043;                  /* DEEP grass: solid fills + green text. AA. */
+  --primary-foreground: #ffffff;       /* white on solid green (light) */
+  --primary-hover: #1a7039;            /* solid-fill hover */
+  --primary-active: #155c2f;           /* solid-fill pressed */
+  --primary-emphasis: #18713a;         /* strongest green text/icons on light */
+  --primary-subtle: #e2f1e6;           /* tonal/soft green bg (selected, soft btn) */
+  --primary-subtle-foreground: #18713a;/* text on subtle green */
+  --green-bright: #34a85a;             /* VIVID accent: dots, progress, glow, ring */
+  /* Link pair — the IDS treatment (RAD-366). Aliases, so a retuned primary
+     keeps its links, and a tinted zone can remap the pair locally the way
+     kirill.green's branded cards remap --ids__link/--ids__hover. Declared
+     once: the theme swap resolves through --primary's own cascade (a custom
+     property substitutes var() on the element it is declared on), so a .dark
+     copy would be a no-op. Hover takes the deepest step the palette owns
+     (4.97:1 -> 8.07:1 on white). */
+  --link: var(--primary);
+  --link-hover: var(--primary-active);
+
+  /* — Semantic state colors —————————————————————————————————————————— */
+  --destructive: #d42a32;              /* red — AA as text and as solid fill */
+  --destructive-foreground: #ffffff;
+  --destructive-subtle: #fdeaeb;
+  --info: #0073cc;                     /* blue — AA as text and as solid fill */
+  --info-foreground: #ffffff;
+  --info-subtle: #e6f2fe;
+  --warning: #99590a;                  /* amber-11: AA as text on light */
+  --warning-foreground: #ffffff;
+  --warning-subtle: #fdf3e0;
+  --success: #1f8043;                  /* == primary */
+  --success-subtle: #e2f1e6;
+
+  /* — Lines (used sparingly; hierarchy is surface-led) ——————————————— */
+  --border: #dcdfde;                   /* neutral subtle separators */
+  --input: #ced1cf;                    /* interactive element border */
+  --ring: #34a85a;                     /* focus ring: vivid green (brand accent) */
+
+  /* — Charts ————————————————————————————————————————————————————————— */
+  --chart-1: #1f8043;
+  --chart-2: #0086f0;
+  --chart-3: #0d9488;
+  --chart-4: #8e4ec6;
+  --chart-5: #d99113;
+
+  /* — Sidebar / chrome (the second neutral layer: green-washed) ——————— */
+  --sidebar: #f6f7f8;                  /* light panel, just off white; distinct via the border-r hairline */
+  --sidebar-foreground: #181c1a;
+  --sidebar-primary: #1f8043;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e2f1e6;           /* selected row — green tonal (brand) */
+  --sidebar-accent-foreground: #18713a;
+  --sidebar-border: #e0e3e1;
+  --sidebar-ring: #34a85a;
+
+  /* — Radius & corner geometry ——————————————————————————————————————— */
+  /* 14px base — the anchor the whole ladder in `@theme inline` is derived
+     from. It is the SURFACE rung, not a universal one: the superellipse only
+     starts to diverge from a plain arc around 18px, so the shape has to be
+     carried by cards, panels and dialogs. Buying that visibility for buttons
+     and inputs too — one flat ladder for every element — is what made small
+     controls read as lozenges, and it is corrected at the rung level rather
+     than here: a radius is right in proportion to its element, and the base
+     stays where a card wants it. */
+  --radius: 0.875rem;
+
+  /* Superellipse constant — the house value, kept in sync with our other
+     surfaces. K=2 is the CSS `squircle` keyword and reads as almost nothing;
+     2.4 flattens the sides enough to register. */
+  --corner-k: 2.4;
+
+  /* iOS app-icon radius ratio (0.2237 × size), for square source/favicon tiles
+     that should read as small app icons rather than rounded squares. Same
+     constant the squircle-mask generator is driven with. */
+  --icon-radius-ratio: 0.2237;
+
+  /* — Elevation (light): soft, green-neutral —————————————————————————— */
+  --shadow-2xs: 0 1px 2px 0 #16201a0a;
+  --shadow-xs: 0 1px 2px 0 #16201a0f;
+  --shadow-sm: 0 1px 2px 0 #16201a0f, 0 1px 3px 0 #16201a0d;
+  --shadow: 0 1px 2px -1px #16201a14, 0 2px 6px -1px #16201a12;
+  --shadow-md: 0 2px 4px -1px #16201a14, 0 6px 16px -4px #16201a14;
+  --shadow-lg: 0 4px 8px -3px #16201a14, 0 12px 28px -6px #16201a1a;
+  --shadow-xl: 0 8px 16px -6px #16201a1a, 0 24px 48px -12px #16201a1f;
+  --shadow-2xl: 0 32px 64px -16px #16201a2e;
+  --shadow-card: 0 0 0 1px #16201a17, 0 1px 2px -1px #16201a14, 0 4px 12px -4px #16201a14;
+  --shadow-card-hover: 0 0 0 1px #16201a24, 0 2px 6px -2px #16201a1a, 0 14px 30px -10px #16201a26;
+  /* The same elevation as `filter`, for surfaces shaped by the squircle mask.
+     A mask clips box-shadow, so a masked card needs drop-shadow — which traces
+     the rendered alpha and therefore follows the squircle rather than a
+     rectangle. drop-shadow has no spread, so the 1px ring that led
+     --shadow-card cannot come along: measured in WebKit, an inset ring stops
+     dead where the curve starts and a border-box background ring fades out
+     through it. The ring is dropped, and it is NOT paid back by deepening the
+     blur. Deepening was the first answer (2026-09-09) and it was wrong twice
+     over: drop-shadow also has no spread, so --shadow-card's `-4px` shrink
+     disappeared at the same time, and the two together roughly doubled the
+     ambient layer. Measured side by side on the real canvas — which is white,
+     and so is --card, so this shadow is the ONLY separator and every extra
+     millimetre of it reads as a halo rather than an edge. The weight below is
+     back at --shadow-card's own level and the missing ring is simply accepted:
+     a masked card is separated by its contact shadow, not by an outline
+     (chosen from five candidates, 2026-09-11). */
+  --filter-card: drop-shadow(0 1px 1px #16201a12) drop-shadow(0 2px 6px #16201a12);
+  --filter-card-hover: drop-shadow(0 1px 2px #16201a1a) drop-shadow(0 6px 14px #16201a1a);
+  --glow-primary: 0 0 0 1px #34a85a3d, 0 6px 20px -6px #34a85a52;
+
+  --spacing: 0.2rem;                   /* density unit (intentionally tight) */
+
+  /* — Motion (derived from transitions.dev / Jakub Antalik values) ——— */
+  --ease-snap: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.36, 0.64, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-dismiss: cubic-bezier(0.4, 0, 1, 1);  /* accelerates away — an element leaving for good */
+  --ease-out-quart: var(--ease-snap); /* alias — quart name retained for compat */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --dur-fast: 150ms;
+  --dur-base: 200ms;
+  --dur-open: 250ms;
+  --dur-close: 150ms;
+  --dur-slow: 300ms;
+  --dur-slower: 400ms; /* background-layer reveals only, never interactive */
+  --dur-feedback: 350ms;
+
+  --motion-blur: 2px;
+}
+
+/* The radius rollback that used to live here (#101) is gone: it existed only
+   because `corner-shape` does not render on WebKit, and the surfaces that
+   carry the shape are now drawn with masks instead, which every engine
+   supports. One radius scale everywhere again. Small controls — buttons,
+   inputs, chips — are still corner-shape-only and therefore still plain arcs
+   on Safari; at 6-10px that is a sub-pixel difference, and it is why the
+   character of the system has to live on the surfaces: k is one constant
+   (2.4) for every element, and only the radius scales. Two shape exponents
+   would make a badge and a card different SHAPES rather than the same shape
+   at two sizes. */
+
+
+.dark {
+  /* — Surfaces (dark): green-tinted, layered ————————————————————————— */
+  --background: #0e100f;               /* near-black, neutral */
+  --foreground: #e9ebea;
+  --card: #1c1f1d;                     /* lifted dark surface — a rung above
+                                          #181a19, paying back the 1px ring the
+                                          squircle mask cannot carry */
+  --card-foreground: #e9ebea;
+  --popover: #1d1f1e;
+  --popover-foreground: #e9ebea;
+  --secondary: #1f2120;
+  --secondary-foreground: #e9ebea;
+  --muted: #1f2120;
+  --muted-foreground: #a1a8a4;         /* AA low-contrast text on dark */
+  --accent: #282a29;                   /* hover bg */
+  --accent-foreground: #e9ebea;
+  --hairline: #ffffff14;               /* ~8% white — edge definition on dark */
+
+  /* — Brand green (dark: brighter, near-black text on solid) ————————— */
+  --primary: #3fae5b;                  /* bright grass: solid fills + green text */
+  --primary-foreground: #0a1410;       /* near-black on bright green */
+  --primary-hover: #4cbd68;
+  --primary-active: #5fce7a;
+  --primary-emphasis: #6fd388;         /* brightest green text on dark */
+  --primary-subtle: #16291c;           /* tonal green bg on dark */
+  --primary-subtle-foreground: #74d68c;
+  --green-bright: #46c46a;             /* vivid accent on dark */
+
+  /* — Semantic state colors —————————————————————————————————————————— */
+  --destructive: #ec5d62;
+  --destructive-foreground: #11080a;
+  --destructive-subtle: #2a1718;
+  --info: #4aa8ff;
+  --info-foreground: #06121f;
+  --info-subtle: #122436;
+  --warning: #ffca16;
+  --warning-foreground: #1f1604;
+  --warning-subtle: #2a2008;
+  --success: #3fae5b;
+  --success-subtle: #16291c;
+
+  /* — Lines —————————————————————————————————————————————————————————— */
+  --border: #282a29;
+  --input: #2e302f;
+  --ring: #46c46a;
+
+  /* — Charts (bright on dark) ———————————————————————————————————————— */
+  --chart-1: #6fd388;
+  --chart-2: #70b8ff;
+  --chart-3: #2dd4bf;
+  --chart-4: #d19dff;
+  --chart-5: #ffca16;
+
+  /* — Sidebar / chrome (dark green panel) ———————————————————————————— */
+  --sidebar: #141615;                  /* neutral dark panel */
+  --sidebar-foreground: #e9ebea;
+  --sidebar-primary: #3fae5b;
+  --sidebar-primary-foreground: #0a1410;
+  --sidebar-accent: #16291c;           /* selected row — green tonal (brand) */
+  --sidebar-accent-foreground: #74d68c;
+  --sidebar-border: #262827;
+  --sidebar-ring: #46c46a;
+
+  /* — Elevation (dark): subtle shadow + hairline ring on cards ——————————
+     The ring is the whole edge here: a black drop shadow cannot separate a
+     dark card from a dark ground, so it carries what the removed top-edge
+     highlight used to. Hence a stronger alpha than light theme needs. */
+  --shadow-2xs: 0 1px 2px 0 #00000040;
+  --shadow-xs: 0 1px 2px 0 #00000059;
+  --shadow-sm: 0 1px 2px 0 #00000059, 0 1px 3px 0 #00000040;
+  --shadow: 0 1px 2px -1px #00000073, 0 2px 6px -1px #00000059;
+  --shadow-md: 0 2px 4px -1px #00000073, 0 6px 16px -4px #00000059;
+  --shadow-lg: 0 4px 8px -3px #00000080, 0 12px 28px -6px #00000066;
+  --shadow-xl: 0 8px 16px -6px #00000099, 0 24px 48px -12px #00000080;
+  --shadow-2xl: 0 32px 64px -16px #000000a6;
+  --shadow-card: 0 0 0 1px #ffffff1a, 0 1px 2px 0 #00000066, 0 6px 18px -6px #00000066;
+  --shadow-card-hover: 0 0 0 1px #ffffff26, 0 2px 6px -2px #00000080, 0 16px 36px -10px #00000099;
+  /* Dark leans on that 1px ring harder than light does — a dark shadow cannot
+     separate a dark card from a dark ground. A masked surface cannot keep it
+     (no hairline survives a mask), so there the separation is carried by
+     lightness instead (--card is stepped up above), which is what the house
+     rule asks for in dark anyway: levels, not outlines.
+
+     No spread here either, and that one was never a style choice: these two
+     took a FOURTH drop-shadow value until 2026-09-11. Spread is Filter Effects
+     Level 2 and no engine ships it (CSS.supports is false in Chrome 154), so
+     the whole `filter` declaration was invalid at computed-value time and every
+     masked card in dark rendered with NO shadow at all, hover included — the
+     lightness step was carrying the entire job alone. Three values now, kept
+     tight: they read as contact under a card the lightness step already
+     separates. */
+  --filter-card: drop-shadow(0 1px 1px #0000008c) drop-shadow(0 2px 6px #00000059);
+  --filter-card-hover: drop-shadow(0 1px 2px #000000a6) drop-shadow(0 6px 14px #00000073);
+  --glow-primary: 0 0 0 1px #46c46a47, 0 6px 22px -6px #46c46a4d;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-active: var(--primary-active);
+  --color-primary-emphasis: var(--primary-emphasis);
+  --color-primary-subtle: var(--primary-subtle);
+  --color-primary-subtle-foreground: var(--primary-subtle-foreground);
+  --color-green-bright: var(--green-bright);
+  --color-hairline: var(--hairline);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-subtle: var(--destructive-subtle);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-subtle: var(--info-subtle);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-success: var(--success);
+  --color-success-subtle: var(--success-subtle);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Typography roles (RAD-363): the family, weights, tracking and line heights
+     resolve against the font actually drawing the element — the role rules in
+     @layer base publish its --type-* adaptation values. */
+  --font-sans: var(--type-text-family);
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  --font-serif: var(--font-inter), ui-serif, Georgia, serif;
+
+  --font-weight-thin: calc(100 * var(--type-wa, 1) + var(--type-wb, 0));
+  --font-weight-extralight: calc(200 * var(--type-wa, 1) + var(--type-wb, 0));
+  --font-weight-light: calc(300 * var(--type-wa, 1) + var(--type-wb, 0));
+  --font-weight-normal: calc(400 * var(--type-wa, 1) + var(--type-wb, 0));
+  --font-weight-medium: calc(500 * var(--type-wa, 1) + var(--type-wb, 0));
+  --font-weight-semibold: calc(600 * var(--type-wa, 1) + var(--type-wb, 0));
+  --font-weight-bold: calc(700 * var(--type-wa, 1) + var(--type-wb, 0));
+  --font-weight-extrabold: calc(800 * var(--type-wa, 1) + var(--type-wb, 0));
+  --font-weight-black: calc(900 * var(--type-wa, 1) + var(--type-wb, 0));
+
+  --tracking-tighter: calc(-0.05em * var(--type-df, 1));
+  --tracking-tight: calc(-0.025em * var(--type-df, 1));
+  --tracking-normal: 0em;
+  --tracking-wide: calc(0.025em * var(--type-cf, 1));
+  --tracking-wider: calc(0.05em * var(--type-cf, 1));
+  --tracking-widest: calc(0.1em * var(--type-cf, 1));
+
+  --text-xs--line-height: calc(calc(1 / 0.75) * var(--type-leading, 1));
+  --text-sm--line-height: calc(calc(1.25 / 0.875) * var(--type-leading, 1));
+  --text-base--line-height: calc(calc(1.5 / 1) * var(--type-leading, 1));
+  --text-lg--line-height: calc(calc(1.75 / 1.125) * var(--type-leading, 1));
+  --text-xl--line-height: calc(calc(1.75 / 1.25) * var(--type-leading, 1));
+  --text-2xl--line-height: calc(calc(2 / 1.5) * var(--type-leading, 1));
+  --text-3xl--line-height: calc(calc(2.25 / 1.875) * var(--type-leading, 1));
+  --text-4xl--line-height: calc(calc(2.5 / 2.25) * var(--type-leading, 1));
+  --text-5xl--line-height: calc(1 * var(--type-leading, 1));
+  --text-6xl--line-height: calc(1 * var(--type-leading, 1));
+  --text-7xl--line-height: calc(1 * var(--type-leading, 1));
+  --text-8xl--line-height: calc(1 * var(--type-leading, 1));
+  --text-9xl--line-height: calc(1 * var(--type-leading, 1));
+
+  --leading-tight: calc(1.25 * var(--type-leading, 1));
+  --leading-snug: calc(1.375 * var(--type-leading, 1));
+  --leading-normal: calc(1.5 * var(--type-leading, 1));
+  --leading-relaxed: calc(1.625 * var(--type-leading, 1));
+  --leading-loose: calc(2 * var(--type-leading, 1));
+
+  /* The ladder is sized by the ELEMENT, not spaced evenly: a corner reads as
+     "right" at roughly a quarter of the shorter side, so a 22px badge and a
+     220px card cannot share a rung. Square tiles are the calibration — the iOS
+     app-icon ratio (--icon-radius-ratio, 0.2237 x edge) is what each control
+     rung below is rounded to, which is why the ladder tightens sharply at the
+     small end and then jumps: controls live at roughly a quarter of their
+     height — 0.22-0.31 across the set, the ends being the smallest badges (xs
+     6 on a 19px box = 0.31, there is no rung below 6) and rows held open by
+     min-h-[36px] (0.22) — and surfaces stop caring about the ratio once they
+     are past ~120px.
+
+     Bands are MEASURED px, not Tailwind's nominal names: --spacing is 0.2rem
+     here, so h-8 is 25.6, h-10 is 32, h-11 is 35.2, h-12 is 38.4, h-16 is 51.2
+     and h-20 is 64. Sizing a corner off the name instead of the box is how a
+     32px button ended up with the corner of a 40px one. */
+  --radius-xs: calc(var(--radius) - 8px);   /*  6 — badges, counters, tags (h 19-26) */
+  --radius-sm: calc(var(--radius) - 6px);   /*  8 — buttons, inputs, selects, menu items (h 26-38) */
+  --radius-md: calc(var(--radius) - 4px);   /* 10 — large + icon buttons, nav rows, 44-51px tiles */
+  --radius-lg: var(--radius);               /* 14 — popovers, menus, nested panels, 60-64px tiles */
+  --radius-xl: calc(var(--radius) + 4px);   /* 18 — cards, panels */
+  --radius-2xl: calc(var(--radius) + 8px);  /* 22 — dialogs, sheets, feature tiles */
+
+  --shadow-2xs: var(--shadow-2xs);
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow: var(--shadow);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-2xl: var(--shadow-2xl);
+
+  --ease-snap: var(--ease-snap);
+  --ease-bounce: var(--ease-bounce);
+  --ease-exit: var(--ease-exit);
+  --ease-dismiss: var(--ease-dismiss);
+  --ease-out-quart: var(--ease-out-quart);
+  --ease-out-expo: var(--ease-out-expo);
+
+  --dur-fast: var(--dur-fast);
+  --dur-base: var(--dur-base);
+  --dur-open: var(--dur-open);
+  --dur-close: var(--dur-close);
+  --dur-slow: var(--dur-slow);
+  --dur-slower: var(--dur-slower);
+  --dur-feedback: var(--dur-feedback);
+
+  --motion-blur: var(--motion-blur);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Typography roles (RAD-363). Each binds its elements to the role's font and
+     publishes the role's adaptation values as the "current" --type-* variables
+     the weight, tracking and leading utilities read. Source order is the
+     precedence at equal specificity: text → heading → tag → counter. */
+  body, .type-text, [data-sonner-toaster] {
+    --type-wa: var(--type-text-wa);
+    --type-wb: var(--type-text-wb);
+    --type-features: var(--type-text-features);
+    --type-caps-adjust: var(--type-text-caps-adjust);
+    --type-df: var(--type-text-df);
+    --type-cf: var(--type-text-cf);
+    --type-leading: var(--type-text-leading);
+    font-family: var(--type-text-family);
+    font-stretch: var(--type-text-stretch);
+    font-size-adjust: var(--type-text-size-adjust);
+    font-feature-settings: var(--type-text-features);
+    font-weight: calc(var(--type-w) * var(--type-wa) + var(--type-wb));
+  }
+  h1, h2, h3, h4, h5, h6, .type-heading {
+    --type-wa: var(--type-heading-wa);
+    --type-wb: var(--type-heading-wb);
+    --type-features: var(--type-heading-features);
+    --type-caps-adjust: var(--type-heading-caps-adjust);
+    --type-df: var(--type-heading-df);
+    --type-cf: var(--type-heading-cf);
+    --type-leading: var(--type-heading-leading);
+    font-family: var(--type-heading-family);
+    font-stretch: var(--type-heading-stretch);
+    font-size-adjust: var(--type-heading-size-adjust);
+    font-feature-settings: var(--type-heading-features);
+    font-weight: calc(var(--type-w) * var(--type-wa) + var(--type-wb));
+  }
+  .type-tag {
+    --type-wa: var(--type-tag-wa);
+    --type-wb: var(--type-tag-wb);
+    --type-features: var(--type-tag-features);
+    --type-caps-adjust: var(--type-tag-caps-adjust);
+    --type-df: var(--type-tag-df);
+    --type-cf: var(--type-tag-cf);
+    --type-leading: var(--type-tag-leading);
+    font-family: var(--type-tag-family);
+    font-stretch: var(--type-tag-stretch);
+    font-size-adjust: var(--type-tag-size-adjust);
+    font-feature-settings: var(--type-tag-features);
+    font-weight: calc(var(--type-w) * var(--type-wa) + var(--type-wb));
+  }
+  .type-counter, [data-numeric] {
+    --type-wa: var(--type-counter-wa);
+    --type-wb: var(--type-counter-wb);
+    --type-features: var(--type-counter-features);
+    --type-caps-adjust: var(--type-counter-caps-adjust);
+    --type-df: var(--type-counter-df);
+    --type-cf: var(--type-counter-cf);
+    --type-leading: var(--type-counter-leading);
+    font-family: var(--type-counter-family);
+    font-stretch: var(--type-counter-stretch);
+    font-size-adjust: var(--type-counter-size-adjust);
+    font-feature-settings: var(--type-counter-features);
+    font-weight: calc(var(--type-w) * var(--type-wa) + var(--type-wb));
+    font-variant-numeric: tabular-nums;
+  }
+  b, strong, th {
+    --type-w: 700;
+    font-weight: calc(700 * var(--type-wa) + var(--type-wb));
+  }
+  /* Code faces are not role fonts: reset the map to identity. */
+  code, kbd, pre, samp {
+    --type-wa: 1;
+    --type-wb: 0;
+    --type-features: "kern";
+    --type-caps-adjust: none;
+    --type-df: 1;
+    --type-cf: 1;
+    --type-leading: 1;
+    font-feature-settings: "kern";
+    font-stretch: 100%;
+    font-size-adjust: none;
+    font-weight: var(--type-w);
+  }
+
+  /* Headings: hierarchy through scale + weight, balanced wrapping.
+     Sizes still set per-call-site with utilities; these are sane defaults. */
+  h1, h2, h3 {
+    text-wrap: balance;
+    letter-spacing: calc(-0.02em * var(--type-df, 1));
+  }
+  h1 { letter-spacing: calc(-0.025em * var(--type-df, 1)); }
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Green text selection — a small, constant brand signal */
+  ::selection {
+    background-color: color-mix(in oklab, var(--green-bright) 26%, transparent);
+    color: var(--foreground);
+  }
+
+  /* Pointer cursor on all interactive elements */
+  button, [role="button"], [type="button"], [type="submit"], [type="reset"],
+  a[href], label[for], summary, [tabindex]:not([tabindex="-1"]) {
+    cursor: pointer;
+  }
+  /* Prevent Safari mobile zoom on input focus */
+  input, textarea, select {
+    font-size: 16px;
+  }
+  /* Native form controls adopt the brand accent (range, checkbox, radio, progress) */
+  input[type="range"], input[type="checkbox"], input[type="radio"], progress {
+    accent-color: var(--green-bright);
+  }
+  /* Superellipse corners are drawn by the `rounded-*` utilities themselves —
+     `corner-shape` where the engine has it, a mask where it does not. See the
+     `@utility squircle-shape` block at the end of this file. The rule that used
+     to live here matched `[class*="rounded-"]`, which is a substring of the
+     CLASS ATTRIBUTE, not of the element a variant targets: `prose-img:rounded-lg`
+     sits on the article while the radius lands on its images. */
+
+  /* Corner radii default to nothing on every element that names a radius, at
+     zero specificity so any utility wins. They are custom properties and would
+     otherwise INHERIT: a `rounded-t-sm` tab inside a `rounded-lg` panel would
+     borrow the panel's bottom corners and notch a square edge. */
+  :where([class*="rounded"]) {
+    --sq-tl-r: 0px;
+    --sq-tr-r: 0px;
+    --sq-br-r: 0px;
+    --sq-bl-r: 0px;
+  }
+  /* The painted ring is an absolutely positioned pseudo-element, so its host
+     must be a containing block. In @layer base, so an `absolute`, `fixed` or
+     `sticky` utility at the call site still wins. */
+  @supports not (corner-shape: superellipse(2)) {
+    :where(:is([class*="rounded-"], [class~="rounded"]):is([class*="ring-"], [class*="outline-"], a, button, [tabindex], [role])) {
+      position: relative;
+    }
+
+    /* The painted ring's width and paint, declared ONCE. The `rounded-*`
+       utilities only switch the pseudo on (`content`) on a masked host that has
+       a ring; everything a pseudo needs besides `content` renders nothing, so it
+       is safe on every rounded element. Inside the utilities this block was
+       copied into every rung and every variant and tripled the stylesheet.
+       Tailwind composes the ring width into --tw-ring-shadow and exposes it
+       nowhere, so it is read back from the same classes and states. Zeroed at
+       zero specificity so a child never inherits its parent's ring; a state rule
+       outranks a rest rule by one pseudo-class, and a later rule wins a tie. */
+    :where([class*="rounded"]) {
+      --sq-ring-w: 0px;
+    }
+    [class*="rounded"][class~="ring-1"] {
+      --sq-ring-w: 1px;
+    }
+    [class*="rounded"][class~="ring-2"],
+    [class*="rounded"]:focus-visible:not([class*="outline-none"]) {
+      --sq-ring-w: 2px;
+    }
+    [class*="rounded"][class*="focus-visible:ring-1"]:focus-visible {
+      --sq-ring-w: 1px;
+    }
+    [class*="rounded"][class*="focus-visible:ring-2"]:focus-visible,
+    [class*="rounded"][class*="focus:ring-2"]:focus,
+    [class*="rounded"][class*="focus-within:ring-2"]:focus-within,
+    [class*="rounded"][class*="data-[state=open]:ring-2"][data-state="open"],
+    [class*="rounded"][class*="has-[[aria-invalid=true]]:ring-2"]:has([aria-invalid="true"]) {
+      --sq-ring-w: 2px;
+    }
+    /* `--tw-ring-color` is registered `inherits: false`, so the pseudo reads it
+       with `inherit` or paints nothing. The inner corners are one ring-width
+       smaller, never negative. Layers bottom-up: the content box, the border box
+       subtracting it (the frame), then the content box's four notches unioned
+       back in; the host's own mask clips the outside.
+
+       THE RING GUARD IS LOAD-BEARING. This used to match every rounded element,
+       on the theory that a pseudo needs `content` before anything else renders —
+       true for OUR pseudo, false for anyone else's: a library that generates its
+       own `::after` on a rounded element inherits this paint wholesale. Sonner
+       does exactly that: its expanded-toast gap strip is `[data-expanded=true]
+       ::after { content: ''; bottom: 100%; height: calc(var(--gap) + 1px) }`,
+       content-only and invisible by design — and a toast wears `!rounded-xl`.
+       The strip therefore painted `var(--ring)` GREEN through the notch mask,
+       leaving two green crescents at the toast's top corners, and because our
+       `inset: 0` (zero specificity) also armed `top: 0`, the invisible strip was
+       dragged inside the toast's box to sit exactly on those corners. It showed
+       on hover of anything over the toaster — the profile chip shares its corner
+       — because Sonner only sets `data-expanded` while the toaster is hovered.
+
+       The state list must stay identical to the `content` switch in
+       `@utility squircle-shape`; a state added to one has to be added here. */
+    :where([class*="rounded"]:is([class~="ring-1"], [class~="ring-2"], :focus-visible:not([class*="outline-none"]), [class*="focus-visible:ring-"]:focus-visible, [class*="focus:ring-"]:focus, [class*="focus-within:ring-"]:focus-within, [class*="data-[state=open]:ring-"][data-state="open"], [class*="has-[[aria-invalid=true]]:ring-"]:has([aria-invalid="true"])))::after {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      box-sizing: border-box;
+      padding: var(--sq-ring-w);
+      --tw-ring-color: inherit;
+      background: var(--tw-ring-color, var(--ring));
+      --sq-tl-ri: max(0px, calc(var(--sq-tl-r) - var(--sq-ring-w)));
+      --sq-tr-ri: max(0px, calc(var(--sq-tr-r) - var(--sq-ring-w)));
+      --sq-br-ri: max(0px, calc(var(--sq-br-r) - var(--sq-ring-w)));
+      --sq-bl-ri: max(0px, calc(var(--sq-bl-r) - var(--sq-ring-w)));
+      -webkit-mask-image: var(--sq-tl), var(--sq-tr), var(--sq-br), var(--sq-bl), linear-gradient(#fff, #fff), linear-gradient(#fff, #fff);
+      mask-image: var(--sq-tl), var(--sq-tr), var(--sq-br), var(--sq-bl), linear-gradient(#fff, #fff), linear-gradient(#fff, #fff);
+      -webkit-mask-origin: content-box, content-box, content-box, content-box, border-box, content-box;
+      mask-origin: content-box, content-box, content-box, content-box, border-box, content-box;
+      -webkit-mask-clip: content-box, content-box, content-box, content-box, border-box, content-box;
+      mask-clip: content-box, content-box, content-box, content-box, border-box, content-box;
+      -webkit-mask-position: top left, top right, bottom right, bottom left, 0 0, 0 0;
+      mask-position: top left, top right, bottom right, bottom left, 0 0, 0 0;
+      -webkit-mask-size: var(--sq-tl-ri) var(--sq-tl-ri), var(--sq-tr-ri) var(--sq-tr-ri), var(--sq-br-ri) var(--sq-br-ri), var(--sq-bl-ri) var(--sq-bl-ri), 100% 100%, 100% 100%;
+      mask-size: var(--sq-tl-ri) var(--sq-tl-ri), var(--sq-tr-ri) var(--sq-tr-ri), var(--sq-br-ri) var(--sq-br-ri), var(--sq-bl-ri) var(--sq-bl-ri), 100% 100%, 100% 100%;
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-composite: source-over, source-over, source-over, source-over, source-out, source-over;
+      mask-composite: add, add, add, add, subtract, add;
+    }
+  }
+
+  /* A rolling number's box must not grow the line it sits in (RAD-355).
+
+     `.morph-number` is the host of the NumberFlow element that
+     `components/ui/morph-number.tsx` renders (the class, not the tag: the tag
+     name belongs to the library's internals). Its own stylesheet gives the host
+     `line-height: 1` and pads the digit spans by half the mask band on each
+     side, so at 14px/20px the host is 22px tall and the line box grows with it —
+     measured: the summary line became 22px and its glyphs sat 2px lower than the
+     same sentence as plain text, shifting everything below it.
+
+     Two overrides bring it back, measured at DPR 2 and 4 against a plain-text
+     reference of the same sentence: the mask band shrinks to 0.15em (the roll
+     stays hidden — checked mid-flight) and the box is nudged back onto the text
+     baseline in `em`, so it scales with the type. Result: line box 20px, glyph
+     columns and rows identical to plain text.
+
+     Why a plain rule is enough here (RAD-357): the mask band is *inherited* into
+     the shadow tree, and `vertical-align` on the host is an outer-tree
+     declaration, which the scoping cascade prefers over the shadow's own
+     `:host` rule. The library's sheet is never injected into this app at all —
+     `number-flow/styles` has no importer — so this is not a specificity fight.
+     A future override of a property the library *sets itself* (padding,
+     line-height) would have to live outside `@layer base` to win. */
+  .morph-number {
+    --number-flow-mask-height: 0.15em;
+    vertical-align: 0.07em;
+  }
+
+  /* Accessibility: every animation collapses to a crossfade/instant.
+
+     The delays matter as much as the durations. A staggered entrance
+     (`animate-fade-in-scale` + an inline `animationDelay`, as in AnimatedGrid
+     and the stories list) keeps its stagger when only the duration collapses:
+     nothing *moves*, but cards still arrive one after another across the
+     `Math.min(index * 50, 500)` ladder — 700ms end to end with `--dur-base` —
+     which is the motion the setting asks to remove.
+
+     `!important` is load-bearing twice over. The `.delay-*` ladder and the
+     `.animate-*` classes live in `@layer utilities`, a LATER layer than this
+     one, so a normal declaration here would lose to the project's own
+     utilities; and the stagger is applied inline, which only an author
+     `!important` outranks. (Layer order reverses for important declarations,
+     so sitting in `base` makes this guard stronger, not weaker.)
+
+     The delay is NEGATIVE, not 0.01ms. A positive delay leaves `currentTime`
+     at 0 on the first painted frame, so `.will-animate`'s `opacity: 0` base
+     state paints for one frame and the whole grid blinks — measured in
+     Chromium, WebKit and Firefox. -1ms starts the animation already past its
+     0.01ms duration, so it is `finished` before the first paint. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: -1ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      transition-delay: 0s !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar but keep scroll functionality */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+  }
+
+  /* RAD-230 — reserve the scrollbar's space up front so a container that
+     becomes scrollable as its content grows never shifts the layout
+     sideways. `-both` additionally reserves the opposite edge, only for
+     content centred by auto margins (a centred form column, the peek reading
+     column) — a one-edge gutter would unbalance those, while on left-aligned
+     content (dialog bodies) the extra edge would indent it against its title. */
+  .scrollbar-stable {
+    scrollbar-gutter: stable;
+  }
+  .scrollbar-stable-both {
+    scrollbar-gutter: stable both-edges;
+  }
+
+  /* — Themed image toggle (class-based, follows next-themes .dark) — */
+  .themed-light { display: block; }
+  .themed-dark  { display: none; }
+  .dark .themed-light { display: none; }
+  .dark .themed-dark  { display: block; }
+
+  /* — Elevation helpers ————————————————————————————————————————————
+     `filter`, not `box-shadow`: these surfaces are shaped by the squircle at
+     the bottom of this file, and a mask clips box-shadow. drop-shadow traces
+     the rendered alpha instead, so it follows the squircle.
+
+     `.elevation-card` itself lands on an <img>, which cannot host the ::before
+     that carries the shape — so it is masked directly and the shadow moves one
+     level up, onto the wrapper ThemedImg renders. */
+  .elevation-shadow {
+    filter: var(--filter-card);
+  }
+  .elevation-card-hover {
+    filter: var(--filter-card-hover);
+  }
+  /* Soft green halo for emphasised / focused brand moments */
+  .glow-primary {
+    box-shadow: var(--glow-primary);
+  }
+
+  /* — Staggered reveal animations ——————————————————————————————————— */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  /* The Posts grid no longer uses this class: removing a card has to be
+     sequenced against the sibling reflow, so components/materials/animated-grid.tsx
+     drives the same shape from JS, reading these tokens via lib/motion.ts.
+     Kept for the /design-system demo and for one-off CSS dismissals. */
+  @keyframes dismissCard {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0.85); }
+  }
+  @keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.98); filter: blur(var(--motion-blur)); }
+    to { opacity: 1; transform: scale(1); filter: blur(0); }
+  }
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .animate-dismiss {
+    animation: dismissCard var(--dur-slow) var(--ease-exit) forwards;
+    transform-origin: center center;
+    pointer-events: none;
+  }
+  .animate-fade-in-up {
+    animation: fadeInUp 0.28s var(--ease-out-quart) forwards;
+  }
+  .animate-fade-in-scale {
+    animation: fadeInScale var(--dur-base) var(--ease-out-quart) forwards;
+  }
+  .animate-slide-in-right {
+    animation: slideInRight 0.28s var(--ease-out-quart) forwards;
+  }
+
+  /* Animation delays for staggered effect */
+  .delay-0 { animation-delay: 0ms; }
+  .delay-50 { animation-delay: 50ms; }
+  .delay-100 { animation-delay: 100ms; }
+  .delay-150 { animation-delay: 150ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-250 { animation-delay: 250ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-350 { animation-delay: 350ms; }
+  .delay-400 { animation-delay: 400ms; }
+  .delay-450 { animation-delay: 450ms; }
+  .delay-500 { animation-delay: 500ms; }
+
+  /* — Shimmer / glow sweep for parsing log ————————————————————————— */
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -100% 0; }
+  }
+  .animate-shimmer {
+    --shimmer-base: #6a7a70;
+    --shimmer-highlight: #1f8043;
+    background: linear-gradient(
+      90deg,
+      var(--shimmer-base) 0%,
+      var(--shimmer-base) 35%,
+      var(--shimmer-highlight) 50%,
+      var(--shimmer-base) 65%,
+      var(--shimmer-base) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .dark .animate-shimmer {
+    --shimmer-base: #6b7a70;
+    --shimmer-highlight: #6fd388;
+  }
+
+  /* Log line fade transition */
+  @keyframes logFadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-log-fade-in {
+    animation: logFadeIn 0.3s var(--ease-out-quart) forwards;
+  }
+
+  /* — Shake (input error rejection) ——————————————————————————————————— */
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(2px); }
+    100% { transform: translateX(0); }
+  }
+  .animate-shake {
+    animation: shake var(--dur-base) var(--ease-snap) forwards;
+  }
+
+  /* — Count swap (opacity crossfade for sidebar/SSE counts) ————————— */
+  @keyframes countSwap {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .animate-count-swap {
+    animation: countSwap var(--dur-fast) ease-in-out forwards;
+  }
+
+  /* — Icon pop (like/dislike feedback) —————————————————————————————— */
+  @keyframes iconPop {
+    from { opacity: 0; transform: scale(0.25); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .animate-icon-pop {
+    animation: iconPop var(--dur-fast) var(--ease-snap) forwards;
+  }
+
+  /* — Success check (rotate-in + bob + path draw) ——————————————————— */
+  @keyframes successRotateIn {
+    from { opacity: 0; transform: rotate(80deg) translateY(40px); filter: blur(var(--motion-blur)); }
+    to { opacity: 1; transform: rotate(0deg) translateY(0); filter: blur(0); }
+  }
+  @keyframes successBob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+  @keyframes successPathDraw {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
+  }
+  .animate-success-check {
+    animation: successRotateIn var(--dur-feedback) var(--ease-bounce) forwards;
+  }
+  .animate-success-path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: successPathDraw calc(var(--dur-feedback) * 0.9) var(--ease-snap) forwards;
+    animation-delay: 80ms;
+  }
+
+  /* Start with opacity 0 for animated elements */
+  .will-animate { opacity: 0; }
+
+  /* — Source type cards — glow effect ——————————————————————————————— */
+  .source-type-card {
+    --surface-bg: var(--card);
+    filter: var(--filter-card);
+    transition: filter 0.2s var(--ease-out-quart), transform 0.2s var(--ease-out-quart);
+  }
+  .source-type-card:hover {
+    filter: var(--filter-card-hover);
+    transform: translateY(-2px);
+  }
+  .source-type-glow {
+    background: var(--card-glow);
+  }
+  .source-type-icon-wrap {
+    background: var(--card-icon-bg);
+  }
+  .source-type-icon {
+    color: var(--card-color);
+  }
+  .dark .source-type-glow {
+    background: var(--card-glow-dark);
+  }
+  .dark .source-type-icon-wrap {
+    background: var(--card-icon-bg-dark);
+  }
+  .dark .source-type-icon {
+    color: var(--card-color-dark);
+  }
+
+  /* — Cross-engine squircle corners ————————————————————————————————————
+     The `corner-shape` rule in @layer base is Chromium-only: `CSS.supports`
+     is false for it on every WebKit, so on an iPhone these corners were plain
+     circular arcs at a radius scale that had been RAISED to compensate for a
+     superellipse cutting less corner than an arc. #101 papered over that by
+     rolling the radius back where corner-shape is missing; this replaces it
+     with the shape itself.
+
+     Four SVG corner NOTCHES — each the sliver between a corner point and the
+     superellipse arc — unioned and SUBTRACTED from one rectangle stretched to
+     `100% 100%`. The corner stays a fixed number of pixels, the fill follows
+     the element, and there is no size ceiling. Regenerate the art with
+     `node scripts/gen-superellipse.mjs 2.4 24`, which carries the geometry.
+     k=2.4 is the house constant; the measured 45-degree bite is 8.40px at
+     the 24px rung against 8.51 predicted and 9.94 for an arc — identical in
+     Chromium and WebKit.
+
+     What this replaced was the opposite: four WHOLE boxes, opaque except a
+     1-unit notch, INTERSECTED at `mask-size: calc(var(--sq-r) * 100)` — a
+     fixed 1800px at `--radius-xl`. Everything up to 1800px painted, between
+     1800 and 3600 only the band [size - 1800, 1800] did, and past 3600px
+     nothing did. A production list shipped that form and lost its background
+     entirely; Radaric's ceiling was lower still, because --radius-xl is 18px
+     rather than 24.
+     No mask layer may be sized independently of its element — RAD-314.
+
+     `border-radius: 0` is mandatory wherever the mask is applied directly: an
+     arc cuts MORE corner than the superellipse inside it, so a surviving
+     radius clips the notch away and the mask becomes invisible.
+
+     Scope is load-bearing. A mask clips everything painted outside the box —
+     outer shadows, focus rings, deliberately overhanging children — so here it
+     goes on surfaces only. Controls are masked by the `rounded-*` utilities at
+     the end of the file, which paint their ring instead and skip anything with a
+     shadow or border. Widen either list only after checking those three things
+     on the element you are adding.
+
+     The corner art and the layer lists live on :root because the `rounded-*`
+     utilities mask controls with them too (see the `@utility rounded-*` block
+     at the end of this file). None of them mentions a radius, so hoisting them
+     freezes nothing. */
+  :root {
+    --sq-tl: url('data:image/svg+xml;utf-8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><path d=%22M-5,100L0,100L0.1785,89.6962L0.7134,81.6734L1.6038,74.3829L2.8477,67.5787L4.4425,61.1627L6.3849,55.0876L8.6709,49.3295L11.2962,43.8769L14.2557,38.7251L17.544,33.8739L21.1556,29.3258L25.0846,25.0846L29.3258,21.1556L33.8739,17.544L38.7251,14.2557L43.8769,11.2962L49.3295,8.6709L55.0876,6.3849L61.1627,4.4425L67.5787,2.8477L74.3829,1.6038L81.6734,0.7134L89.6962,0.1785L100,0L100,-5L-5,-5Z%22/></svg>');
+    --sq-tr: url('data:image/svg+xml;utf-8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><path d=%22M0,-5L0,0L10.3038,0.1785L18.3266,0.7134L25.6171,1.6038L32.4213,2.8477L38.8373,4.4425L44.9124,6.3849L50.6705,8.6709L56.1231,11.2962L61.2749,14.2557L66.1261,17.544L70.6742,21.1556L74.9154,25.0846L78.8444,29.3258L82.456,33.8739L85.7443,38.7251L88.7038,43.8769L91.3291,49.3295L93.6151,55.0876L95.5575,61.1627L97.1523,67.5787L98.3962,74.3829L99.2866,81.6734L99.8215,89.6962L100,100L105,100L105,-5Z%22/></svg>');
+    --sq-br: url('data:image/svg+xml;utf-8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><path d=%22M105,0L100,0L99.8215,10.3038L99.2866,18.3266L98.3962,25.6171L97.1523,32.4213L95.5575,38.8373L93.6151,44.9124L91.3291,50.6705L88.7038,56.1231L85.7443,61.2749L82.456,66.1261L78.8444,70.6742L74.9154,74.9154L70.6742,78.8444L66.1261,82.456L61.2749,85.7443L56.1231,88.7038L50.6705,91.3291L44.9124,93.6151L38.8373,95.5575L32.4213,97.1523L25.6171,98.3962L18.3266,99.2866L10.3038,99.8215L0,100L0,105L105,105Z%22/></svg>');
+    --sq-bl: url('data:image/svg+xml;utf-8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><path d=%22M100,105L100,100L89.6962,99.8215L81.6734,99.2866L74.3829,98.3962L67.5787,97.1523L61.1627,95.5575L55.0876,93.6151L49.3295,91.3291L43.8769,88.7038L38.7251,85.7443L33.8739,82.456L29.3258,78.8444L25.0846,74.9154L21.1556,70.6742L17.544,66.1261L14.2557,61.2749L11.2962,56.1231L8.6709,50.6705L6.3849,44.9124L4.4425,38.8373L2.8477,32.4213L1.6038,25.6171L0.7134,18.3266L0.1785,10.3038L0,0L-5,0L-5,105Z%22/></svg>');
+    /* The layer lists that never mention --sq-r, hoisted so the two mask rules
+       below cannot drift apart. `mask-size` is deliberately NOT hoisted with
+       them: a var() inside a custom property is substituted where that property
+       is DECLARED, so a hoisted size would freeze --sq-r at the host's rung and
+       any pseudo that overrides --sq-r on itself would silently draw at the
+       host's radius. */
+    --sq-mask:
+      linear-gradient(#fff, #fff), var(--sq-tl), var(--sq-tr), var(--sq-br),
+      var(--sq-bl);
+    --sq-mask-position: 0 0, top left, top right, bottom right, bottom left;
+    /* The top-two-corner variant, for a band flush with the host's top edge. */
+    --sq-mask-top: linear-gradient(#fff, #fff), var(--sq-tl), var(--sq-tr);
+    --sq-mask-top-position: 0 0, top left, top right;
+  }
+
+  /* The shape is painted by a ::before, not by masking the element itself.
+     A mask is applied AFTER `filter` in the rendering model, so a mask and a
+     drop-shadow on the SAME element cancel out — the shadow is generated and
+     then clipped away by the very mask that shaped it. Measured in WebKit: the
+     element renders with no shadow at all. Moving the mask down to a pseudo
+     that carries the background, and leaving the filter on the host, gives a
+     drop-shadow that traces the masked alpha and therefore follows the
+     squircle. It also stops the mask clipping the card's CONTENT, so a badge
+     may overhang again.
+
+     `isolation: isolate` is load-bearing: the pseudo sits at z-index -1 so the
+     card's own children paint above it, and without a stacking context on the
+     host that -1 escapes behind the nearest ancestor's background. `filter`
+     happens to create one too, but it must not be the ONLY thing doing so —
+     `.corner-round` sets `filter: none`, and a future theme could as well. */
+  .surface-card,
+  .source-type-card {
+    position: relative;
+    isolation: isolate;
+    --sq-r: var(--radius-xl);
+  }
+  .surface-card::before,
+  .source-type-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--surface-bg, var(--card));
+    /* Only the four corners are a fixed number of pixels; the fill layer is
+       `100% 100%` and follows the box at any size. Read the layers bottom-up,
+       which is how they composite: the four notches union into one shape, then
+       the fill on top takes `subtract` (Porter-Duff `source-out` = source AND
+       NOT destination), giving `rect - (tl | tr | br | bl)` at every size.
+
+       `exclude`/`xor` is the wrong operator even though it renders identically
+       on everything shipping today. XOR equals subtraction only while the
+       notches are DISJOINT — the moment two overlap, the first cancels the
+       region to 0 and the second brings it back to 1, so the cut corner turns
+       OPAQUE. That happens whenever the element is narrower or shorter than
+       2 * --sq-r, i.e. under 36px at the default rung, which is icon-tile
+       territory. Measured at 26x26 with r=24 over a red ground:
+       subtract leaves (209,26,26), XOR leaves (228,118,118), both engines.
+
+       Unioning the notches costs nothing because they do not abut. The FILL
+       must stay one stretched rectangle, though: `source-over` combines alpha
+       as a1 + a2 - a1*a2, so two anti-aliased edges meeting at 0.5 each give
+       0.75 and show as a hairline wherever two layers meet.
+
+       The fill is `#fff`, not `#000`: white is alpha 1 AND luminance 1, so the
+       layer is opaque under either `mask-mode` resolution. */
+    -webkit-mask-image: var(--sq-mask);
+    mask-image: var(--sq-mask);
+    -webkit-mask-position: var(--sq-mask-position);
+    mask-position: var(--sq-mask-position);
+    -webkit-mask-size:
+      100% 100%,
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r);
+    mask-size:
+      100% 100%,
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-composite:
+      source-out, source-over, source-over, source-over, source-over;
+    mask-composite: subtract, add, add, add, add;
+  }
+
+  /* A replaced element has no ::before, so an image and a tile are masked
+     directly and give up the outer shadow — which for a tile there never was,
+     and which for a figure image moves up to `.elevation-shadow` on the
+     wrapper ThemedImg renders. */
+  .elevation-card,
+  .icon-tile {
+    border-radius: 0;
+    --sq-r: var(--radius-xl);
+    /* Same construction as the ::before rule above, which carries the why. */
+    -webkit-mask-image: var(--sq-mask);
+    mask-image: var(--sq-mask);
+    -webkit-mask-position: var(--sq-mask-position);
+    mask-position: var(--sq-mask-position);
+    -webkit-mask-size:
+      100% 100%,
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r);
+    mask-size:
+      100% 100%,
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-composite:
+      source-out, source-over, source-over, source-over, source-over;
+    mask-composite: subtract, add, add, add, add;
+  }
+
+  /* Clip a CHILD to the same squircle as its masked host. `overflow: hidden` on
+     the host cannot do this job: an overflow clip follows `border-radius`, i.e.
+     an arc, and an arc cuts MORE corner than the superellipse inside it — so it
+     clips the host's own ::before back to an arc and the squircle disappears.
+     Chromium hides that, because the `corner-shape` rule in @layer base
+     reshapes the overflow clip to match; WebKit has no `corner-shape`, so the
+     clip stays a true arc — i.e. every iPhone. Measured on an 18px rung,
+     diagonal scan at dpr 4: 4.0-4.5px masked in both engines (superellipse
+     predicts 4.51), 5.0-5.5px in WebKit through an `overflow-hidden` host (an
+     arc predicts 5.27).
+
+     `.surface-mask` is for a child that spans the whole host — an absolutely
+     positioned overlay, a glow blob that must not bleed. `.surface-mask-top`
+     is for a band flush with the TOP edge only, such as a full-bleed cover
+     image; its lower corners stay square because they sit inside the card.
+     Both inherit --sq-* and --sq-r from the host, so they follow its rung.
+
+     A mask on a child does not collide with the host's `filter`: the two
+     cancel only on the SAME element. */
+  .surface-mask {
+    border-radius: 0;
+    -webkit-mask-image: var(--sq-mask);
+    mask-image: var(--sq-mask);
+    -webkit-mask-position: var(--sq-mask-position);
+    mask-position: var(--sq-mask-position);
+    -webkit-mask-size:
+      100% 100%,
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r);
+    mask-size:
+      100% 100%,
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-composite:
+      source-out, source-over, source-over, source-over, source-over;
+    mask-composite: subtract, add, add, add, add;
+  }
+  .surface-mask-top {
+    border-radius: 0;
+    -webkit-mask-image: var(--sq-mask-top);
+    mask-image: var(--sq-mask-top);
+    -webkit-mask-position: var(--sq-mask-top-position);
+    mask-position: var(--sq-mask-top-position);
+    -webkit-mask-size:
+      100% 100%,
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r);
+    mask-size:
+      100% 100%,
+      var(--sq-r) var(--sq-r),
+      var(--sq-r) var(--sq-r);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-composite: source-out, source-over, source-over;
+    mask-composite: subtract, add, add;
+  }
+
+  /* --sq-r is a custom property, so it INHERITS: the defaults above have to
+     sit on the mask rules themselves, or a card nested in a card silently
+     borrows its parent's radius. The overrides below win on specificity, not
+     on order — except .icon-tile, which is a bare class and must therefore
+     stay AFTER the rule that defaults it.
+
+     Square tiles read as small app icons, so they take the iOS app-icon radius
+     RATIO rather than a rung: a 24px tile and a 48px tile need different radii
+     to look like the same shape. Set --tile-size to the tile's edge length. */
+  .icon-tile { --sq-r: calc(var(--tile-size, 2rem) * var(--icon-radius-ratio)); }
+
+  :is(.surface-card, .elevation-card, .source-type-card)[class~="rounded-2xl"] { --sq-r: var(--radius-2xl); }
+  :is(.surface-card, .elevation-card, .source-type-card)[class~="rounded-lg"] { --sq-r: var(--radius-lg); }
+  :is(.surface-card, .elevation-card, .source-type-card)[class~="rounded-md"] { --sq-r: var(--radius-md); }
+  :is(.surface-card, .elevation-card, .source-type-card)[class~="rounded-sm"] { --sq-r: var(--radius-sm); }
+  :is(.surface-card, .elevation-card, .source-type-card)[class~="rounded-xs"] { --sq-r: var(--radius-xs); }
+
+  .surface-card {
+    filter: var(--filter-card);
+  }
+  /* This one declaration of the escape hatch has to STAY in `utilities`, and it
+     is the exception that proves the rule below. The rest of `.corner-round`'s
+     paint moved down a layer so the Tailwind utilities at the call site win —
+     but `filter` does not collide with a utility, it collides with the project
+     rule directly above, and layer order beats specificity in BOTH directions:
+     one layer down, `filter: none` loses to `.surface-card` and an opted-out
+     card silently keeps the drop-shadow on top of its own box-shadow. At
+     (0,2,0) in this layer it wins, and no `corner-round` call site sets a
+     Tailwind filter utility. It is also what makes the note above `isolation:
+     isolate` true: that rule exists because `filter` must not be the only thing
+     establishing the stacking context, which requires this to actually apply. */
+  .surface-card.corner-round {
+    filter: none;
+  }
+
+  /* Opt-out, for a card that must carry an OUTLINE. A hairline does not
+     survive a mask in any form — an inset ring follows border-radius, which
+     the mask zeroes, so it draws a square and the mask cuts its corners off;
+     an outer ring is clipped away entirely. A card whose ring or border means
+     something (recommended plan, destructive warning) keeps the outline and
+     gives up the squircle, rather than losing the meaning. `corner-round` is
+     the same escape hatch the corner-shape rule in @layer base already
+     honours, so such a card reads as a plain arc on every engine.
+
+     Only the ::before suppression lives here, because it has to outrank
+     `.surface-card::before` in this same layer. The paint declarations sit in
+     @layer components at the end of this file — the note there says why. */
+  .surface-card.corner-round::before {
+    display: none;
+  }
+  /* Hover and focus for a card that is itself a control. */
+  .surface-card-interactive {
+    transition: filter 0.2s var(--ease-out-quart);
+  }
+  .surface-card-interactive:hover {
+    filter: var(--filter-card-hover);
+  }
+  /* An OUTLINE, never an inset box-shadow. The pseudo sits at z-index -1, and a
+     negative-z child paints after the host's own background and box-shadow
+     (CSS 2.1 Appendix E steps 2-3 vs 4) — so an inset ring on the host is drawn
+     and then covered by the opaque ::before, and `outline: none` takes the UA
+     fallback away with it. Measured: white at every offset inside the edge, in
+     both engines, on every interactive card. An outline paints last of all and
+     no descendant can cover it; the negative offset keeps it inside the box,
+     where an outer ring would be cut off by the mask instead. */
+  .surface-card-interactive:focus-visible,
+  .source-type-card:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: -2px;
+  }
+}
+
+/* `.surface-card.corner-round` is (0,2,0). Inside @layer utilities — where
+   Tailwind emits `.bg-primary-subtle`, `.ring-1`, `.shadow-xl` at (0,1,0) —
+   it outranks every utility the call site relies on, and the escape hatch that
+   exists to PRESERVE a meaningful outline destroys it instead: measured, a
+   `corner-round bg-primary-subtle ring-1 ring-inset ring-primary/25` card came
+   out plain white with no ring at all. Layer order beats specificity, so the
+   paint declarations live one layer down and the utilities win again. The
+   `::before` suppression stays in `utilities`, where it has to outrank
+   `.surface-card::before`. */
+@layer components {
+  .surface-card.corner-round {
+    border-radius: var(--radius-xl);
+    background: var(--surface-bg, var(--card));
+    box-shadow: var(--shadow-card);
+  }
+}
+
+/* The logical weight the font-* utilities set; each element maps it through
+   its own font (RAD-363). */
+@property --type-w {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 400;
+}
+
+/* Sonner injects an unlayered `font-family` on its toaster, which beats any
+   layered rule — only an unlayered !important puts it on the text role. */
+[data-sonner-toaster] {
+  font-family: var(--type-text-family) !important;
+}
+/* Its literal weights too: map them through the text role's font. */
+[data-sonner-toast] [data-title],
+[data-sonner-toast] [data-button] {
+  font-weight: calc(500 * var(--type-wa) + var(--type-wb)) !important;
+}
+[data-sonner-toast] [data-description] {
+  font-weight: calc(400 * var(--type-wa) + var(--type-wb)) !important;
+}
+
+/* — The superellipse on every rounded rectangle, on every engine ——————————
+   Everything below this line is `@utility` and must stay last: the text guards
+   in __tests__/squircle-mask.test.ts stop reading at the first `@utility`, and
+   these blocks are pinned on Tailwind's compiled output instead
+   (__tests__/squircle-utilities.test.ts).
+
+   #103 masked SURFACES only and left controls as arcs on WebKit, reasoning that
+   no hairline survives a mask. A box-shadow hairline does not: the ring runs
+   along the square box and the mask cuts it at the corners — 9, 13 and 17 of
+   31 rays through the corner hit no ring pixel at r = 8, 14 and 22, in both
+   engines (2026-09-13). A PAINTED ring does: an ::after filled with the ring
+   colour, masked to "border box minus the content box's squircle", clipped by
+   the host's own mask. 0 of 31 at every rung. So every button, input, chip,
+   badge, menu item and image on an iPhone is now the same shape as in Chrome;
+   the arcs were visible on the posts toolbar.
+
+   WHY INSIDE THE UTILITY. A blanket `[class*="rounded-"]` matches the class
+   attribute, not the element a variant targets: `prose-img:rounded-lg` sits on
+   the article, `focus:rounded-md` on a skip link that is square until focused,
+   `sm:rounded-2xl` on a dialog that is full-bleed on a phone. Declared here,
+   every variant carries the shape to its own element.
+
+   WHAT IS NOT MASKED, and keeps its arc on WebKit until it moves onto the
+   ::before construction: anything with a box-shadow (a mask deletes an outer
+   shadow — except a Button, whose 1px drop shadow is given up on WebKit), a
+   `border` (cut at the corners like a ring), `backdrop-blur` and scrollers
+   (unproven under a mask on iOS), native fields (no pseudo-elements — `Input`
+   and `Textarea` draw on a frame instead), the surfaces that already draw their
+   own shape, and any host that contains one of them or an embed.
+
+   THE RING. `--tw-ring-color` is registered `inherits: false`, so the pseudo
+   declares `inherit` or it paints nothing. Tailwind composes the width into
+   `--tw-ring-shadow` and exposes it nowhere, so `--sq-ring-w` is set from the
+   same classes and states the markup uses. A focus ring that was an outline
+   (clipped by a mask like everything outside the box) is painted the same way,
+   2px inside the edge. Forced colours strip backgrounds, which would take the
+   painted ring with them, so there the mask is dropped and the outline returns. */
+@utility squircle-shape {
+  @supports (corner-shape: superellipse(2)) {
+    &:not(.corner-round) {
+      corner-shape: superellipse(var(--corner-k));
+    }
+  }
+  @supports not (corner-shape: superellipse(2)) {
+    &:not(.corner-round, .surface-card, .elevation-card, .source-type-card, .icon-tile, .surface-mask, .surface-mask-top, .elevation-shadow, [class*="shadow-"]:not([data-slot="button"]), [class~="border"], [class*="backdrop-blur"], [class*="overflow-auto"], [class*="overflow-y-auto"], [class*="overflow-x-auto"], :has(.surface-card, .source-type-card, .elevation-shadow, iframe, video), input, textarea, select, video) {
+      border-radius: 0;
+      --tw-ring-shadow: 0 0 #0000 !important;
+      --tw-inset-ring-shadow: 0 0 #0000 !important;
+      --tw-ring-offset-shadow: 0 0 #0000 !important;
+      -webkit-mask-image: var(--sq-mask);
+      mask-image: var(--sq-mask);
+      -webkit-mask-position: var(--sq-mask-position);
+      mask-position: var(--sq-mask-position);
+      -webkit-mask-size: 100% 100%, var(--sq-tl-r) var(--sq-tl-r), var(--sq-tr-r) var(--sq-tr-r), var(--sq-br-r) var(--sq-br-r), var(--sq-bl-r) var(--sq-bl-r);
+      mask-size: 100% 100%, var(--sq-tl-r) var(--sq-tl-r), var(--sq-tr-r) var(--sq-tr-r), var(--sq-br-r) var(--sq-br-r), var(--sq-bl-r) var(--sq-bl-r);
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-composite: source-out, source-over, source-over, source-over, source-over;
+      mask-composite: subtract, add, add, add, add;
+
+      /* Switch the painted ring on. Its width and paint are the flat rules in
+         @layer base; forced colours strip backgrounds, which would take a painted
+         ring with them, so there the mask goes and the outline comes back. */
+      &:focus-visible:not([class*="outline-none"]) {
+        outline-color: transparent;
+      }
+      &:is([class~="ring-1"], [class~="ring-2"], :focus-visible:not([class*="outline-none"]), [class*="focus-visible:ring-"]:focus-visible, [class*="focus:ring-"]:focus, [class*="focus-within:ring-"]:focus-within, [class*="data-[state=open]:ring-"][data-state="open"], [class*="has-[[aria-invalid=true]]:ring-"]:has([aria-invalid="true"])) {
+        &::after {
+          content: "";
+        }
+      }
+      @media (forced-colors: active) {
+        -webkit-mask-image: none;
+        mask-image: none;
+        &:is([class~="ring-1"], [class~="ring-2"], :focus-visible:not([class*="outline-none"]), [class*="focus-visible:ring-"]:focus-visible, [class*="focus:ring-"]:focus, [class*="focus-within:ring-"]:focus-within, [class*="data-[state=open]:ring-"][data-state="open"], [class*="has-[[aria-invalid=true]]:ring-"]:has([aria-invalid="true"])) {
+          &::after {
+            content: none;
+          }
+        }
+        &:focus-visible:not([class*="outline-none"]) {
+          outline-color: CanvasText;
+        }
+      }
+    }
+  }
+}
+
+/* The shorthand declares all four corners, a side two. Tailwind sorts rules
+   with more declarations first, which is also how it sorts the built-in
+   border-radius rules — so `rounded-sm rounded-t-xl` masks xl on top, as it
+   draws. */
+@utility rounded-* {
+  --sq-tl-r: --value(--radius-*, [length]);
+  --sq-tr-r: --value(--radius-*, [length]);
+  --sq-br-r: --value(--radius-*, [length]);
+  --sq-bl-r: --value(--radius-*, [length]);
+  @apply squircle-shape;
+}
+@utility rounded {
+  --sq-tl-r: 0.25rem;
+  --sq-tr-r: 0.25rem;
+  --sq-br-r: 0.25rem;
+  --sq-bl-r: 0.25rem;
+  @apply squircle-shape;
+}
+@utility rounded-none {
+  --sq-tl-r: 0px;
+  --sq-tr-r: 0px;
+  --sq-br-r: 0px;
+  --sq-bl-r: 0px;
+}
+@utility rounded-t-* {
+  --sq-tl-r: --value(--radius-*, [length]);
+  --sq-tr-r: --value(--radius-*, [length]);
+  @apply squircle-shape;
+}
+@utility rounded-b-* {
+  --sq-br-r: --value(--radius-*, [length]);
+  --sq-bl-r: --value(--radius-*, [length]);
+  @apply squircle-shape;
+}
+@utility rounded-l-* {
+  --sq-tl-r: --value(--radius-*, [length]);
+  --sq-bl-r: --value(--radius-*, [length]);
+  @apply squircle-shape;
+}
+@utility rounded-r-* {
+  --sq-tr-r: --value(--radius-*, [length]);
+  --sq-br-r: --value(--radius-*, [length]);
+  @apply squircle-shape;
+}
+
+/* — Typography roles (RAD-363) ——————————————————————————————————————————
+   Same-name utilities merge into Tailwind's core ones (and every variant):
+   the weight utilities also set the logical weight, uppercase adds the case
+   feature and the caps size adjust, font-mono resets the map. */
+@utility font-thin {
+  --type-w: 100;
+}
+@utility font-extralight {
+  --type-w: 200;
+}
+@utility font-light {
+  --type-w: 300;
+}
+@utility font-normal {
+  --type-w: 400;
+}
+@utility font-medium {
+  --type-w: 500;
+}
+@utility font-semibold {
+  --type-w: 600;
+}
+@utility font-bold {
+  --type-w: 700;
+}
+@utility font-extrabold {
+  --type-w: 800;
+}
+@utility font-black {
+  --type-w: 900;
+}
+/* `normal-case` does not undo these two: never toggle `uppercase` off with a
+   variant (`uppercase md:normal-case`) — no call site does. */
+@utility uppercase {
+  font-feature-settings: var(--type-features), "case";
+  font-size-adjust: var(--type-caps-adjust);
+}
+@utility font-mono {
+  --type-wa: 1;
+  --type-wb: 0;
+  --type-features: "kern";
+  --type-caps-adjust: none;
+  --type-df: 1;
+  --type-cf: 1;
+  --type-leading: 1;
+  font-feature-settings: "kern";
+  font-stretch: 100%;
+  font-size-adjust: none;
+  font-weight: var(--type-w);
+}
+
+/* — Single-line truncation clips sideways only (RAD-388) ——————————————————
+   Core `truncate` is `overflow: hidden`, which cuts both axes at the line box.
+   IBM Plex Sans's tallest accent rises 0.0583em above its normalised ascent
+   (Inter's: 0.0283em), so a 24px `h1.truncate` lost 1.4px of it; a tight
+   leading cuts descenders the same way. `clip visible` keeps the
+   ellipsis (drawn identically in Chromium and WebKit, 2026-10-13) and lets ink
+   past the top and bottom of the line box paint. No fallback is kept: the
+   production minifier folds the core `hidden` into this rule, and every
+   engine Tailwind v4 supports (Safari 16.4+) has `overflow: clip`.
+
+   Two blocks, because they must sort to two different places (Tailwind orders
+   rules by their first property, then more declarations first):
+   - `min-width: 0` lands BEFORE `min-w-*`, so an explicit one still wins. A
+     clip box is not a scroll container, so without it a flex or grid item's
+     automatic minimum is its full unwrapped text and every `flex-1 truncate`
+     overflows its row. The repeated `text-overflow` is what sorts it there.
+   - `overflow: clip visible` lands AFTER the core `overflow: hidden` but BEFORE
+     `overflow-*`, so an explicit overflow utility still wins.
+   Order pinned on the compiled output by __tests__/truncate-utility.test.ts. */
+@utility truncate {
+  min-width: 0;
+  text-overflow: ellipsis;
+}
+@utility truncate {
+  overflow: clip visible;
+  text-overflow: ellipsis;
+}
+
+/* — Reading prose ————————————————————————————————————————————————————————
+   A post's and a story's body read at the ink, not at Tailwind Typography's
+   gray-700 `--tw-prose-body` default: at reading length that one-step-lighter
+   gray costs legibility against a headline already in `--foreground`
+   (RAD-361).
+
+   BOTH variables are set on purpose. The reading surfaces also wear
+   `dark:prose-invert` (class-scoped to `.dark` since RAD-362), which re-points
+   `--tw-prose-body` at the invert variable inside the dark class — so the
+   invert variable must resolve to the same ink or the dark app would hand the
+   body back the plugin's gray. The rest of the prose palette (headings, bold,
+   code) rides the same class along with it.
+
+   Chosen over `text-foreground` on the container: the outcome there rests on
+   Tailwind's utility sort order beating `.prose`'s `color`, so a plugin
+   reorder would silently restore the gray — the variable override is pinned
+   by __tests__/reading-prose-ink.test.tsx instead. */
+@utility prose-ink {
+  --tw-prose-body: var(--foreground);
+  --tw-prose-invert-body: var(--foreground);
+
+  /* The plugin's literal prose weights, re-expressed through the font's map
+     at (0,2,0) so they beat the plugin's (0,1,0) rules (RAD-363). That also
+     outranks a call site's `prose-headings:` / `prose-strong:` variant, which
+     is (0,1,0) — so a weight variant next to prose-ink needs `!`
+     (`prose-headings:font-semibold!`, pinned by typography-roles-css). */
+  &.prose :where(h1):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    --type-w: 800;
+    font-weight: calc(800 * var(--type-wa, 1) + var(--type-wb, 0));
+  }
+  &.prose :where(h2):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    --type-w: 700;
+    font-weight: calc(700 * var(--type-wa, 1) + var(--type-wb, 0));
+  }
+  &.prose :where(h3):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    --type-w: 600;
+    font-weight: calc(600 * var(--type-wa, 1) + var(--type-wb, 0));
+  }
+  &.prose :where(h4):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    --type-w: 600;
+    font-weight: calc(600 * var(--type-wa, 1) + var(--type-wb, 0));
+  }
+  &.prose :where(strong):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    --type-w: 600;
+    font-weight: calc(600 * var(--type-wa, 1) + var(--type-wb, 0));
+  }
+  /* The plugin's heading-strong weights, after the plain strong rule so they
+     win at equal specificity: `<h2><strong>` stays heavier than its heading. */
+  &.prose :where(h1 strong):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    --type-w: 900;
+    font-weight: calc(900 * var(--type-wa, 1) + var(--type-wb, 0));
+  }
+  &.prose :where(h2 strong):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    --type-w: 800;
+    font-weight: calc(800 * var(--type-wa, 1) + var(--type-wb, 0));
+  }
+  &.prose :where(h3 strong, h4 strong):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    --type-w: 700;
+    font-weight: calc(700 * var(--type-wa, 1) + var(--type-wb, 0));
+  }
+  &.prose :where(a):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    --type-w: 500;
+    font-weight: calc(500 * var(--type-wa, 1) + var(--type-wb, 0));
+  }
+  &.prose :where(thead th):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    --type-w: 600;
+    font-weight: calc(600 * var(--type-wa, 1) + var(--type-wb, 0));
+  }
+  &.prose :where(dt):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    --type-w: 600;
+    font-weight: calc(600 * var(--type-wa, 1) + var(--type-wb, 0));
+  }
+}
+
+/* — Links —————————————————————————————————————————————————————————————————
+   The IDS link treatment, ported (RAD-366). A link is always underlined and
+   the rule is quiet: a 20% tint of the link's own colour, so the underline is
+   the affordance while the words keep the contrast. The rule derives from
+   `currentColor` rather than naming the token, which is why hover only
+   re-declares the colour — any zone that recolours a link repaints the rule
+   with it (kirill.green re-declares both only because its rule references a
+   token). `text-decoration-skip-ink: none` keeps the rule unbroken under
+   descenders — the IDS signature.
+
+   Motion is asymmetric: hover-IN is instant, the return fades over
+   --dur-fast. IDS ships a 0.5s return and kirill-green tunes it to 0.15s
+   precisely because the colour otherwise trails behind the cursor across a
+   page of links (site/css/custom.css) — 150ms is this system's fast rung and
+   keeps the fade without the smear. The hover block sits inside
+   `@media (hover: hover)` because a raw `&:hover` in a custom utility is NOT
+   media-gated the way Tailwind's `hover:` variant is; without it a tap on
+   touch fires the state and can stick.
+
+   Focus rides `:where` so this rule stays at (0,1,0): a `Button` that reads
+   as text is still a control, and its own `focus-visible:outline-none` +
+   inset ring must win here by specificity, not by emission order. Mirrors
+   IDS's cross-visibility rule (site/css/reset.css), recoloured to --ring.
+   No :visited and no :active — IDS has neither for text links.
+
+   SURFACE CONTRACT: never on a non-anchor (an underline + focus ring on
+   non-interactive text), and a link never sits on --primary-subtle /
+   --secondary / --accent, where light-mode --primary drops below 4.5:1 —
+   wear `link-on-tint` there instead (below). --muted passes, at 4.55:1, the
+   thinnest margin in the system.
+
+   USAGE: bare `link` on a standalone anchor; `[&_a]:link` on a prose
+   container. NOTE the cascade: this is a custom utility, so it carries no
+   order advantage over core utilities at the same specificity — a leftover
+   colour, underline-offset or transition-colors class on the same element
+   silently wins. Converted call sites must DELETE the old classes. */
+@utility link {
+  color: var(--link);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-skip-ink: none;
+  text-decoration-color: color-mix(in oklab, currentColor 20%, transparent);
+  transition:
+    color var(--dur-fast) var(--ease-snap),
+    text-decoration-color var(--dur-fast) var(--ease-snap);
+
+  @media (hover: hover) {
+    &:hover {
+      color: var(--link-hover);
+      transition-duration: 0s;
+    }
+  }
+
+  &:where(:focus-visible) {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+/* A link that must live on a tint (RAD-366). --primary drops below AA on
+   --primary-subtle / --secondary / --accent, so such a zone wears this next
+   to `link` and the pair remaps to the strongest greens — rest on
+   --primary-emphasis, hover one step further in the SAME direction. The dark
+   hover is class-scoped (`.dark &`) rather than a `dark:` utility, so the pair
+   stays one declaration set. Worked example: the AI-not-configured banner. */
+@utility link-on-tint {
+  --link: var(--primary-emphasis);
+  --link-hover: var(--primary-active);
+
+  .dark & {
+    --link-hover: var(--primary-subtle-foreground);
+  }
+}

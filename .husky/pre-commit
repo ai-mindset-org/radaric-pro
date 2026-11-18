@@ -1,0 +1,5 @@
+# Pre-commit: schema-preservation check, lint-staged, and a non-blocking knip report.
+
+bash scripts/check-schema-preservation.sh
+npx lint-staged
+npx knip --reporter compact --no-exit-code || true

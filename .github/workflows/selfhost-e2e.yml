@@ -1,0 +1,45 @@
+name: Self-host e2e
+# RAD-292: proves the self-host quick start end-to-end — the stack builds, both
+# health endpoints answer, the baseline leaves no failed or unfinished migration
+# row and no drift, the first account becomes ADMIN, a credentials session
+# works, an onboarding feed is parsed and saved, and a restart changes nothing.
+#
+# Runs at the repository root, which in this tree already is the published
+# source: the squashed migration baseline is part of it.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  selfhost-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.4'
+          cache: 'npm'
+
+      - name: Run the self-host end-to-end check
+        env:
+          SELFHOST_E2E_DIAGNOSTICS: ${{ runner.temp }}/selfhost-e2e-diagnostics.log
+        run: bash scripts/selfhost-e2e.sh
+
+      - name: Upload the failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selfhost-e2e-diagnostics
+          path: ${{ runner.temp }}/selfhost-e2e-diagnostics.log
+          if-no-files-found: warn

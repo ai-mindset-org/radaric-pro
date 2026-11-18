@@ -1,0 +1,21 @@
+# Compose override for the self-host end-to-end check (RAD-292).
+#
+# Adds one static HTTP server on the stack's network, so the onboarding probe
+# parses a real feed over HTTP against a hostname the app can resolve, without
+# reaching the internet and without opening a port on the host.
+#
+# Relative paths resolve against the project directory, which is the repository
+# root (the first -f file's directory), not this file's directory.
+services:
+  rssfixture:
+    image: nginx:alpine
+    restart: "no"
+    volumes:
+      - ./scripts/selfhost-e2e/feed.xml:/usr/share/nginx/html/feed.xml:ro
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+        max-file: "1"

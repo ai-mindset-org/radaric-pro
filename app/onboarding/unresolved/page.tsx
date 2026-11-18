@@ -1,0 +1,25 @@
+"use client"
+import { useState, useEffect, use } from "react"; import { useRouter } from "next/navigation"; import { Button } from "@/components/ui/button"; import { Input } from "@/components/ui/input"; import { PhaseIndicator } from "@/components/onboarding/phase-indicator"; import { ArrowLeft, CheckCircle, XCircle, Loader2 } from "lucide-react"; import type { ExtractedFeed } from "@/lib/onboarding-types"; import { persistFeeds } from "@/lib/onboarding-persist"
+interface Item { feed: ExtractedFeed; inputUrl: string; validating: boolean; valid: boolean | null }
+export default function UnresolvedFeedsPage({ searchParams }: { searchParams?: Promise<{ revisit?: string | string[] }> }) {
+  // RAD-168: ?revisit=1 (set by the revisit gate) is cosmetic — welcome-back copy, no Preferences phase — and rides along to the next step.
+  const revisit = (searchParams ? use(searchParams) : undefined)?.revisit === "1"; const q = revisit ? "?revisit=1" : ""
+  const router = useRouter(); const [items, setItems] = useState<Item[]>([]); const [isSaving, setIsSaving] = useState(false)
+  useEffect(() => { const s = sessionStorage.getItem("onboarding:feeds"); if (!s) { router.push(`/onboarding/feeds${q}`); return }; const p: ExtractedFeed[] = JSON.parse(s); const u = p.filter(f => f.type==="WEBSITE" && f.status==="not_found").map(f => ({ feed: f, inputUrl: "", validating: false, valid: null as boolean|null })); if (!u.length) { router.push(`/onboarding/review${q}`); return }; setItems(u) }, []) // eslint-disable-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect -- sessionStorage is only readable after mount
+  const validate = async (i: number) => { const it = items[i]; if (!it.inputUrl.trim()) return; setItems(p => p.map((x,j) => j===i ? { ...x, validating: true, valid: null } : x)); try { const r = await fetch("/api/onboarding/validate-feed", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: it.inputUrl }) }); const d = await r.json(); setItems(p => p.map((x,j) => j===i ? { ...x, validating: false, valid: d.valid } : x)) } catch { setItems(p => p.map((x,j) => j===i ? { ...x, validating: false, valid: false } : x)) } }
+  const handleSave = async () => { if (isSaving) return; setIsSaving(true); const s = sessionStorage.getItem("onboarding:feeds"); const all: ExtractedFeed[] = s ? JSON.parse(s) : []; if (s) { for (const it of items) { if (it.inputUrl.trim() && it.valid) { const idx = all.findIndex(f => f.url===it.feed.url && f.status==="not_found"); if (idx!==-1) all[idx] = { ...all[idx], type: "RSS", feedUrl: it.inputUrl, status: "found" } } }; sessionStorage.setItem("onboarding:feeds", JSON.stringify(all)) }; await persistFeeds(all); router.push(`/onboarding/review${q}`) }
+  const domain = (url: string|null) => { if (!url) return "Unknown"; try { return new URL(url).hostname.replace("www.", "") } catch { return url } }
+  if (!items.length) return null
+  return (<><PhaseIndicator currentPhase="import" skipPreferences={revisit} /><div className="mt-10 space-y-6">
+    <div><Button variant="ghost" size="sm" className="mb-2 -ml-2 text-muted-foreground" onClick={() => router.push(`/onboarding/feeds${q}`)}><ArrowLeft className="h-[16px] w-[16px] mr-1" />Back</Button><h1 className="text-3xl font-bold tracking-tight">Almost there — some sites need a direct link</h1><p className="mt-2 text-base text-muted-foreground">Add RSS feed URLs, or skip to exclude them</p></div>
+    <div className="space-y-4">{items.map((it, i) => <div key={i} className="rounded-xl bg-card shadow-[var(--shadow-card)] p-4 space-y-2">
+      <p className="text-base font-medium">{domain(it.feed.url)}</p>
+      <Input value={it.inputUrl} onChange={e => setItems(p => p.map((x,j) => j===i ? { ...x, inputUrl: e.target.value, valid: null } : x))} onBlur={() => it.inputUrl.trim() && validate(i)} placeholder="https://example.com/feed.xml" />
+      {it.validating && <div className="flex items-center gap-1.5"><Loader2 className="h-[14px] w-[14px] motion-safe:animate-spin text-muted-foreground" /><span className="text-xs text-muted-foreground">Checking...</span></div>}
+      {it.valid===true && <div className="flex items-center gap-1.5"><CheckCircle className="h-[14px] w-[14px] text-primary" /><span className="text-xs text-primary">Valid RSS feed</span></div>}
+      {it.valid===false && <div className="flex items-center gap-1.5"><XCircle className="h-[14px] w-[14px] text-destructive" /><span className="text-xs text-destructive">Not a valid feed</span></div>}
+      <p className="text-xs text-muted-foreground">Try searching &ldquo;{domain(it.feed.url)} RSS feed&rdquo;</p>
+    </div>)}</div>
+    <div className="flex items-center justify-between"><Button variant="ghost" onClick={() => router.push(`/onboarding/review${q}`)}>Skip these feeds →</Button><Button onClick={handleSave} disabled={isSaving}>{isSaving ? <><Loader2 className="h-[16px] w-[16px] mr-2 motion-safe:animate-spin" />Saving...</> : "Save & continue"}</Button></div>
+  </div></>)
+}

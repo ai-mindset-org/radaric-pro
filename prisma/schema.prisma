@@ -1,0 +1,623 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// USER & AUTH
+// ============================================================================
+
+/// User account for authentication
+model User {
+  id               String    @id @default(cuid())
+  username         String    @unique
+  email            String?   @unique
+  emailVerified    DateTime? @map("email_verified")
+  image            String?
+  passwordHash     String?   @map("password_hash")
+  name             String?
+  role             UserRole  @default(USER)
+  isActive         Boolean   @default(true) @map("is_active")
+  stripeCustomerId String?   @unique @map("stripe_customer_id")
+  // Hand-granted time-limited free access (comp = Lite tier). Null = none.
+  // Access-only; NOT derivable from any Stripe/subscription signal, so it lives
+  // as its own column. Read by hasActiveAccess; never grants Twitter (Lite).
+  complimentaryAccessUntil DateTime? @map("complimentary_access_until")
+  // First-touch `?ref=` slug the account arrived with (lib/signup-ref.ts). Written once at creation; null = unknown.
+  signupRef                String?   @map("signup_ref")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  feeds          Feed[]
+  folders        Folder[]
+  blacklistItems BlacklistItem[]
+  userSettings   UserSettings?
+  aiFeedbacks    AIFeedback[]
+  inboxItems     InboxItem[]
+  stories        Story[]
+  accounts       Account[]
+  subscription   Subscription?
+  collections    Collection[]
+  savedItems     SavedItem[]
+  savedExcerpts  SavedExcerpt[]
+  emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens     PasswordResetToken[]
+
+  @@map("users")
+}
+
+/// Single-use email-verification tokens (RAD-297). Only the SHA-256 hash of the
+/// token is stored; the raw value exists only in the emailed link.
+model EmailVerificationToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique @map("token_hash")
+  userId    String    @map("user_id")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("email_verification_tokens")
+}
+
+/// Single-use password-reset tokens (RAD-324). Hash-only storage, 1h TTL; a
+/// successful reset also invalidates every other outstanding token for the user.
+/// This replaced the old `jwt.sign({userId}, NEXTAUTH_SECRET)` scheme, which let
+/// anyone holding the secret mint a reset for any account (including ADMIN).
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique @map("token_hash")
+  userId    String    @map("user_id")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+/// Subscription row mirroring Stripe subscription state
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String             @unique @map("user_id")
+  stripeSubscriptionId String             @unique @map("stripe_subscription_id")
+  stripePriceId        String             @map("stripe_price_id")
+  status               SubscriptionStatus
+  currentPeriodStart   DateTime           @map("current_period_start")
+  currentPeriodEnd     DateTime           @map("current_period_end")
+  cancelAtPeriodEnd    Boolean            @default(false) @map("cancel_at_period_end")
+  canceledAt           DateTime?          @map("canceled_at")
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@map("subscriptions")
+}
+
+enum SubscriptionStatus {
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  PAUSED
+  UNKNOWN
+}
+
+/// Stripe webhook event log — pure idempotency fence (id is the dedup PK)
+model StripeEvent {
+  id          String   @id
+  type        String
+  processedAt DateTime @default(now()) @map("processed_at")
+
+  @@index([type])
+  @@map("stripe_events")
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+/// Per-user settings (prompt, Notion integration)
+model UserSettings {
+  id               String   @id @default(cuid())
+  userId           String   @unique @map("user_id")
+  globalPrompt     String?  @map("global_prompt")
+  notionToken      String?  @map("notion_token")
+  notionDatabaseId String?  @map("notion_database_id")
+  // Story Aggregator settings
+  storyInboxChannelId   String?  @map("story_inbox_channel_id")
+  storyNotionDatabaseId String?  @map("story_notion_database_id")
+  storyLastMessageId    Int?     @map("story_last_message_id")
+  storySystemPrompt     String?  @map("story_system_prompt")
+  storyPromptVersion    Int?     @default(1) @map("story_prompt_version")
+  storyWriterModel      String?  @map("story_writer_model")
+  storyMatcherModel     String?  @map("story_matcher_model")
+  materialStoryModel    String?  @map("material_story_model")
+  storyLanguage         String   @default("en") @map("story_language")
+  autoDeleteTelegramMessages Boolean @default(false) @map("auto_delete_telegram_messages")
+  globalLikedCategories      String[] @default([]) @map("global_liked_categories")
+  globalDislikedCategories   String[] @default([]) @map("global_disliked_categories")
+  onboardingCompleted        Boolean  @default(false) @map("onboarding_completed")
+  onboardingBannerDismissed  Boolean  @default(false) @map("onboarding_banner_dismissed")
+  onboardingState            Json?    @map("onboarding_state")
+  // RAD-363: per-role font picker (heading/text/counter/tag); null = default (all Inter)
+  typography                 Json?    @map("typography")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+/// OAuth account (Google, Apple)
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refreshToken      String? @map("refresh_token")
+  accessToken       String? @map("access_token")
+  expiresAt         Int?    @map("expires_at")
+  tokenType         String? @map("token_type")
+  scope             String?
+  idToken           String? @map("id_token")
+  sessionState      String? @map("session_state")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+// ============================================================================
+// CONTENT
+// ============================================================================
+
+/// User-created folder organizing sources in the sidebar (RAD-393). Flat — a
+/// source belongs to at most one folder; folders are purely organizational and
+/// never affect parsing/filtering. Deleting a folder unfiles its sources.
+model Folder {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  name      String
+  /// Case-folded name — the DB-enforced uniqueness key (no read-then-write race).
+  nameLower String   @map("name_lower")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  feeds Feed[]
+
+  @@unique([userId, nameLower], map: "folder_user_name_lower_unique")
+  @@index([userId])
+  @@map("folders")
+}
+
+/// Content feed (RSS feed, Telegram channel, Twitter account, or Interest monitor)
+model Feed {
+  id                String           @id @default(cuid())
+  userId            String?          @map("user_id") // Nullable for migration, will be required after
+  type              SourceType
+  url               String
+  name              String
+  coverUrl          String?          @map("cover_url")
+  faviconUrl        String?          @map("favicon_url")
+  customPrompt      String?          @map("custom_prompt")
+  isActive          Boolean          @default(true) @map("is_active")
+  status            SourceStatus     @default(ACTIVE)
+  errorMessage      String?          @map("error_message")
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+  lastParsedAt      DateTime?        @map("last_parsed_at")
+  interestCadence   InterestCadence? @map("interest_cadence")
+  interestQuery     String?          @map("interest_query")
+  parallelMonitorId String?          @unique @map("parallel_monitor_id")
+  likedCategories    String[]         @default([]) @map("liked_categories")
+  dislikedCategories String[]        @default([]) @map("disliked_categories")
+  includeRetweets    Boolean          @default(false) @map("include_retweets")
+  tags               String[]         @default([])
+  /// User-created source folder (sidebar organization). Null = uncategorized.
+  /// SetNull on folder delete: sources survive and return to Uncategorized.
+  folderId           String?          @map("folder_id")
+  /// True for the backing monitor feed of a self-filling Collection — hidden
+  /// from the Feeds list + sidebar so the user can't delete it (and orphan a
+  /// paid monitor) out from under the collection.
+  hidden             Boolean          @default(false)
+  /// Set when a Parallel monitor-delete failed during cleanup; the worker
+  /// reconcile-retries so capped billing resources don't leak.
+  monitorDeletePending Boolean        @default(false) @map("monitor_delete_pending")
+  /// True when the worker's access reconcile paused this feed's Parallel monitor
+  /// because the owner's access lapsed (RAD-323). A user pause leaves it false.
+  /// Only flagged feeds are auto-re-armed once the owner's access returns.
+  accessPaused      Boolean          @default(false) @map("access_paused")
+
+  user      User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder    Folder?      @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  feedbacks AIFeedback[]
+  materials Material[]
+  backedCollection Collection? @relation("CollectionMonitor")
+
+  @@unique([userId, url], map: "source_user_url_unique")
+  @@index([userId])
+  @@index([folderId])
+  @@map("sources")
+}
+
+/// Material (article, post, etc.) from a feed
+model Material {
+  id              String         @id @default(cuid())
+  sourceId        String         @map("source_id")
+  title           String
+  url             String
+  content         String
+  publishedAt     DateTime?      @map("published_at")
+  aiEvaluation    AIEvaluation   @map("ai_evaluation")
+  aiConfidence    Int            @map("ai_confidence")
+  aiReasoning     String?        @map("ai_reasoning")
+  userStatus      MaterialStatus @default(NEW) @map("user_status")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+  parsedAt        DateTime       @default(now()) @map("parsed_at")
+  thumbnailUrl    String?        @map("thumbnail_url")
+  mediaUrls       String[]       @default([]) @map("media_urls")
+  externalId      String?        @map("external_id")
+  contentEntities Json?          @map("content_entities")
+  storyId         String?        @map("story_id")
+  storyMatchedAt  DateTime?      @map("story_matched_at")
+  /// When the self-filling router last considered this material for routing into
+  /// tracked questions (null = not yet considered). The routing watermark.
+  routedAt        DateTime?      @map("routed_at")
+
+  feedbacks AIFeedback[]
+  feed      Feed         @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  story     Story?       @relation(fields: [storyId], references: [id])
+  savedItems    SavedItem[]
+  savedExcerpts SavedExcerpt[]
+  collectionLinks CollectionMaterial[]
+
+  @@unique([sourceId, url], map: "material_source_url_unique")
+  @@unique([sourceId, externalId], map: "material_source_external_unique")
+  @@index([sourceId])
+  @@index([aiEvaluation])
+  @@index([userStatus])
+  @@index([publishedAt])
+  @@index([storyId])
+  @@index([routedAt])
+  @@map("materials")
+}
+
+/// AI feedback from user to improve filtering
+model AIFeedback {
+  id             String       @id @default(cuid())
+  userId         String?      @map("user_id") // Nullable for migration
+  materialId     String?      @map("material_id")
+  sourceId       String?      @map("source_id")
+  feedbackType   FeedbackType @default(DISLIKE) @map("feedback_type")
+  commentText    String?      @map("comment_text")
+  feedbackSource String?      @map("feedback_source") // 'explicit' | 'implicit'
+  isGlobal       Boolean      @map("is_global")
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  material Material? @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  feed     Feed?     @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, materialId], map: "ai_feedbacks_user_material_unique")
+  @@index([userId])
+  @@index([sourceId])
+  @@index([isGlobal])
+  @@map("ai_feedbacks")
+}
+
+/// Blacklist items for automatic filtering
+model BlacklistItem {
+  id        String             @id @default(cuid())
+  userId    String?            @map("user_id") // Nullable for migration
+  term      String
+  matchType BlacklistMatchType @default(CONTAINS) @map("match_type")
+  createdAt DateTime           @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, term], map: "blacklist_user_term_unique")
+  @@index([userId])
+  @@index([term])
+  @@map("blacklist_items")
+}
+
+// ============================================================================
+// KNOWLEDGE BASE (Save → Collections → Library)
+// ============================================================================
+
+/// A topic-collection — a human-owned bucket grouping saves by theme/question.
+/// Carries the clean signal (a save into a named topic), and is the future
+/// seed of a question-shaped subscription.
+model Collection {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  name      String
+  /// True for the system default bucket ("Unsorted"); one per user.
+  isSystem  Boolean  @default(false) @map("is_system")
+  /// Set when the user clicks "Track this" on the dormant living-answer slot —
+  /// the Phase-2 demand sensor (records intent for a question-shaped subscription).
+  trackRequestedAt DateTime? @map("track_requested_at")
+  /// The living answer — an LLM-maintained, cited markdown "wiki" page for this
+  /// topic (Karpathy LLM-wiki style). Regenerated from the collection's saves.
+  synthesis        String?   @map("synthesis")
+  /// "What changed" delta from the most recent synthesis regeneration (markdown).
+  synthesisDelta   String?   @map("synthesis_delta")
+  synthesisUpdatedAt DateTime? @map("synthesis_updated_at")
+  /// Self-filling subscription (the question-shaped half). When `query` is set,
+  /// the collection autonomously acquires materials via a backing Parallel
+  /// monitor feed (`monitorFeedId`); the synthesis reads that feed's APPROVED
+  /// materials ∪ the manual saves.
+  query            String?          @map("query")
+  cadence          InterestCadence? @map("cadence")
+  /// The backing hidden EVENT_TRIGGER Feed whose Parallel monitor fills this
+  /// collection. 1:1. SetNull on feed delete so the collection/answer survives.
+  monitorFeedId    String?          @unique @map("monitor_feed_id")
+  /// Debounce anchor: set by the webhook when new relevant material arrives;
+  /// the worker regenerates when `autoSynthAt > synthesisUpdatedAt`.
+  autoSynthAt      DateTime?        @map("auto_synth_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  savedItems    SavedItem[]
+  savedExcerpts SavedExcerpt[]
+  monitorFeed   Feed?          @relation("CollectionMonitor", fields: [monitorFeedId], references: [id], onDelete: SetNull)
+  routedMaterials CollectionMaterial[]
+
+  @@unique([userId, name], map: "collection_user_name_unique")
+  @@index([userId])
+  @@map("collections")
+}
+
+/// A material auto-routed into a tracked question from one of the user's normal
+/// feeds (Slice 2). Distinct from SavedItem (a manual save, one per user+material)
+/// — a material can be routed into multiple tracked questions, and routing must
+/// not collide with the user's manual saves.
+model CollectionMaterial {
+  id           String   @id @default(cuid())
+  collectionId String   @map("collection_id")
+  materialId   String   @map("material_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  material   Material   @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, materialId], map: "collection_material_unique")
+  @@index([materialId])
+  @@map("collection_materials")
+}
+
+/// A saved whole material — the user's "I value this / keep this" signal.
+/// One per (user, material); "Move" re-files it to another collection.
+model SavedItem {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  materialId   String   @map("material_id")
+  collectionId String   @map("collection_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  material   Material   @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, materialId], map: "saved_item_user_material_unique")
+  @@index([userId])
+  @@index([collectionId])
+  @@index([materialId])
+  @@map("saved_items")
+}
+
+/// A saved fragment of a material — a citation atom. Offsets are computed
+/// against the SOURCE content string (not the DOM) so the highlight is stable.
+model SavedExcerpt {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  materialId   String   @map("material_id")
+  collectionId String   @map("collection_id")
+  text         String
+  offsetStart  Int      @map("offset_start")
+  offsetEnd    Int      @map("offset_end")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  material   Material   @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([collectionId])
+  @@index([materialId])
+  @@map("saved_excerpts")
+}
+
+// ============================================================================
+// STORY AGGREGATOR
+// ============================================================================
+
+/// A raw item from the Telegram inbox channel
+model InboxItem {
+  id               String          @id @default(cuid())
+  userId           String          @map("user_id")
+  externalId       String          @unique @map("external_id") // "-channelId:messageId"
+  messageId        Int             @map("message_id")
+  rawText          String?         @map("raw_text")
+  rawEntities      Json?           @map("raw_entities")
+  extractedUrl     String?         @map("extracted_url")
+  extractedTitle   String?         @map("extracted_title")
+  extractedContent String?         @map("extracted_content")
+  mediaUrls        String[]        @default([]) @map("media_urls")
+  thumbnailUrl     String?         @map("thumbnail_url")
+  sourceChannel    String?         @map("source_channel")
+  forwardedFromId  String?         @map("forwarded_from_id")
+  telegramPostUrl  String?         @map("telegram_post_url")
+  allMessageIds    Int[]           @default([]) @map("all_message_ids")
+  status           InboxItemStatus @default(PENDING)
+  storyId          String?         @map("story_id")
+  retryCount       Int             @default(0) @map("retry_count")
+  telegramDeletedAt DateTime?      @map("telegram_deleted_at")
+  processedAt      DateTime?       @map("processed_at")
+  errorMessage     String?         @map("error_message")
+  createdAt        DateTime        @default(now()) @map("created_at")
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  story Story? @relation(fields: [storyId], references: [id])
+
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@map("inbox_items")
+}
+
+/// An editorial story composed from one or more inbox items
+model Story {
+  id             String      @id @default(cuid())
+  userId         String      @map("user_id")
+  title          String
+  languageFlag   String?     @map("language_flag")
+  summary        String
+  body           String
+  keyPoints      String[]    @default([]) @map("key_points")
+  sourceUrls     String[]    @default([]) @map("source_urls")
+  rubrics        String[]    @default([])
+  archiveLinks   Json?       @map("archive_links")
+  notionPageId   String?     @map("notion_page_id")
+  notionUrl      String?     @map("notion_url")
+  status         StoryStatus @default(DRAFT)
+  version        Int         @default(1)
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  inboxItems InboxItem[]
+  materials  Material[]
+
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@map("stories")
+}
+
+enum InboxItemStatus {
+  PENDING
+  EXTRACTING
+  EXTRACTED
+  MATCHED
+  PROCESSED
+  ERROR
+}
+
+enum StoryStatus {
+  DRAFT
+  SENT_TO_NOTION
+  ERROR
+}
+
+// ============================================================================
+// GLOBAL SETTINGS (shared, admin-only)
+// ============================================================================
+
+/// Global settings for the application (API keys, Telegram, Parallel)
+/// Note: globalPrompt, notionToken, notionDatabaseId are deprecated - kept for migration only
+model Settings {
+  id                    String   @id @default(cuid())
+  // AI Settings (global)
+  aiApiKey              String?  @map("ai_api_key")
+  aiModel               String?  @default("claude-sonnet-4-6") @map("ai_model")
+  aiTemperature         Float?   @default(0.3) @map("ai_temperature")
+  // Per-stage model overrides. Null means "use the stage default" from
+  // lib/models/registry.ts — these stages used to borrow aiModel, the FILTERING
+  // model, which is chosen for throughput on hundreds of short items a day and is
+  // the wrong tier for long-form cited prose (synthesis) or recall of real
+  // publications (discovery).
+  synthesisModel        String?  @map("synthesis_model")
+  discoveryModel        String?  @map("discovery_model")
+  // Reasoning effort for the filtering stage. Deliberately String?, not a Prisma
+  // enum: providers keep shipping new values (minimal, none, xhigh) and this repo
+  // requires one ALTER TYPE ... ADD VALUE per migration file. Null means "send no
+  // reasoning_effort at all", which is what every model got before this column.
+  filterReasoningEffort String?  @map("filter_reasoning_effort")
+  // Telegram Settings (global)
+  telegramApiHash       String?  @map("telegram_api_hash")
+  telegramApiId         Int?     @map("telegram_api_id")
+  telegramPhoneNumber   String?  @map("telegram_phone_number")
+  telegramSessionString String?  @map("telegram_session_string")
+  // Parallel Settings (global)
+  parallelApiKey        String?  @map("parallel_api_key")
+  parallelWebhookSecret String?  @map("parallel_webhook_secret")
+  // Deprecated - for migration only (moved to UserSettings)
+  globalPrompt          String?  @map("global_prompt")
+  notionToken           String?  @map("notion_token")
+  notionDatabaseId      String?  @map("notion_database_id")
+  // Timestamps
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum SourceType {
+  RSS
+  TELEGRAM
+  TWITTER
+  INTEREST       // @deprecated — kept for PostgreSQL enum compatibility
+  EVENT_TRIGGER
+  YOUTUBE
+}
+
+enum InterestCadence {
+  HOURLY
+  DAILY
+  WEEKLY
+}
+
+enum SourceStatus {
+  ACTIVE
+  PAUSED
+  ERROR
+}
+
+enum MaterialStatus {
+  NEW
+  READ
+  SENT_TO_NOTION
+  DELETED
+  ARCHIVED
+  SENT_TO_STORIES
+}
+
+enum AIEvaluation {
+  APPROVED
+  FILTERED
+}
+
+enum FeedbackType {
+  LIKE
+  DISLIKE
+}
+
+enum BlacklistMatchType {
+  EXACT
+  CONTAINS
+  REGEX
+}

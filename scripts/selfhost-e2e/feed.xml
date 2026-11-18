@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Synthetic RSS feed for the self-host end-to-end check (RAD-292).
+
+  The check serves this file from a container on the compose network and adds it
+  as an onboarding source, which proves the app can resolve a sibling service,
+  parse a feed and persist it. Three items, example.test links only: nothing
+  here names a real publisher, and no test depends on the internet.
+-->
+<rss version="2.0">
+  <channel>
+    <title>Self-host E2E fixture</title>
+    <link>https://example.test/</link>
+    <description>Three synthetic items for the self-host check.</description>
+    <language>en</language>
+    <item>
+      <title>Fixture item one</title>
+      <link>https://example.test/items/1</link>
+      <guid>https://example.test/items/1</guid>
+      <pubDate>Wed, 01 Jan 2025 09:00:00 GMT</pubDate>
+      <description>Synthetic item one.</description>
+    </item>
+    <item>
+      <title>Fixture item two</title>
+      <link>https://example.test/items/2</link>
+      <guid>https://example.test/items/2</guid>
+      <pubDate>Thu, 02 Jan 2025 09:00:00 GMT</pubDate>
+      <description>Synthetic item two.</description>
+    </item>
+    <item>
+      <title>Fixture item three</title>
+      <link>https://example.test/items/3</link>
+      <guid>https://example.test/items/3</guid>
+      <pubDate>Fri, 03 Jan 2025 09:00:00 GMT</pubDate>
+      <description>Synthetic item three.</description>
+    </item>
+  </channel>
+</rss>

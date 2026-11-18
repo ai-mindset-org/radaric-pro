@@ -1,0 +1,43 @@
+<!doctype html>
+<!--
+  Source of public/og-image.png (RAD-404). Render: node scripts/og-image/render.mjs
+
+  The picture is the product's claim drawn as data, not decoration: 200 bars
+  are a day of posts, the 20 green ones are what Radaric approves — green is
+  the app's own "Approved" state colour (--green-bright). Copy is the landing
+  H1, so a share and the page it opens say the same thing.
+
+  Keep the bottom-left corner quiet: X lays the og:title over it.
+-->
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:Inter;src:url("../../app/fonts/inter/InterVariable-latin.woff2") format("woff2");font-weight:100 900}
+*{box-sizing:border-box;margin:0}
+html,body{width:1200px;height:630px;background:#fff;overflow:hidden}
+body{font-family:Inter;color:#181c1a;font-feature-settings:"cv11","ss01";-webkit-font-smoothing:antialiased;position:relative}
+.mark{position:absolute;left:72px;top:60px;display:flex;align-items:center;gap:8px;font-size:28px;font-weight:600;letter-spacing:-0.02em}
+.mark svg{width:26px;height:26px;color:#1f8043}
+h1{position:absolute;left:72px;top:196px;width:700px;font-size:72px;line-height:1.0;font-weight:650;letter-spacing:-0.045em;font-variation-settings:"opsz" 32}
+.count{position:absolute;left:72px;top:384px;font-size:28px;line-height:1.35;font-weight:500;letter-spacing:-0.01em;color:#5f6662;font-variant-numeric:tabular-nums}
+.count b{color:#181c1a;font-weight:600}
+.field{position:absolute;right:64px;top:64px;width:360px;height:506px;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(34,1fr);column-gap:10px}
+.bar{align-self:center;height:5px;border-radius:2.5px;background:#181c1a;opacity:.09}
+.bar.keep{background:#34a85a;opacity:1;height:7px;border-radius:3.5px}
+</style></head>
+<body>
+<div class="mark">
+  Radaric
+  <!-- lucide SatelliteDish, the mark the landing header uses -->
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a7.31 7.31 0 0 0 10 10Z"/><path d="m9 15 3-3"/><path d="M17 13a6 6 0 0 0-6-6"/><path d="M21 13A10 10 0 0 0 11 3"/></svg>
+</div>
+<h1>Your content taste,<br>but scaled</h1>
+<p class="count">200 posts in.<br><b>20 worth reading out.</b></p>
+<div class="field" id="f"></div>
+<script>
+// Seeded, so every render produces the same image.
+let s=7;const r=()=>(s=(s*16807)%2147483647)/2147483647;
+const keep=new Set();while(keep.size<20)keep.add(Math.floor(r()*200));
+const f=document.getElementById('f');
+for(let i=0;i<200;i++){const b=document.createElement('div');b.className='bar'+(keep.has(i)?' keep':'');b.style.width=(38+r()*62)+'%';f.appendChild(b)}
+</script>
+</body></html>
