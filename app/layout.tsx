@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { interCyrillic, interExt, interLatin } from "./fonts/inter";
+import { clubDisplay, clubUi } from "./fonts/club20";
 import "./fonts/fonts.css";
 import "./globals.css";
+import "./club20-theme.css";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthSessionProvider } from "@/components/providers/session-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
@@ -20,8 +22,8 @@ export const viewport: Viewport = {
   // expanded bottom bar blends with the page instead of defaulting to
   // white/black. Values mirror globals.css :root / .dark.
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0e100f" },
+    { media: "(prefers-color-scheme: light)", color: "#fbfbf9" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0b0b" },
   ],
 };
 
@@ -49,7 +51,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${interLatin.variable} ${interCyrillic.variable} ${interExt.variable}`}
+      className={`${interLatin.variable} ${interCyrillic.variable} ${interExt.variable} ${clubDisplay.variable} ${clubUi.variable}`}
     >
       <body className="antialiased">
         <ThemeProvider

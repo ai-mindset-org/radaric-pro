@@ -1,0 +1,190 @@
+/* ===========================================================================
+   club 2.0 x AI Mindset theme (branch club20-theme).
+
+   A token-only skin over the house design system in globals.css: no component
+   or logic changes. Paper ground, ink text, grey hairlines, signal red as a
+   dose (primary buttons, active states, status dots, badges), soft pink for
+   tonal fills. Playfair Display sets headings, Unbounded sets UI labels
+   (buttons, main navigation, tags), JetBrains Mono sets counters and meta.
+
+   Palette: red #c30b23 · ink #0b0b0b · paper #fbfbf9 · grey #d5d5d7 ·
+   soft pink #ffe9eb.
+
+   Specificity: globals.css declares the light tokens on `:root` and the dark
+   ones on `.dark`; the per-user font choice is injected later as an unlayered
+   `:root{}` style tag. The selectors below are one class stronger than each,
+   so the theme wins without !important and dark mode keeps its own block.
+   Remove the import in app/layout.tsx to get the upstream look back.
+   =========================================================================== */
+
+/* – Light ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– */
+:root:not(.dark) {
+  --background: #fbfbf9;               /* paper */
+  --foreground: #0b0b0b;               /* ink */
+  --card: #ffffff;
+  --card-foreground: #0b0b0b;
+  --popover: #ffffff;
+  --popover-foreground: #0b0b0b;
+  --secondary: #f1f1ef;
+  --secondary-foreground: #0b0b0b;
+  --muted: #f3f3f1;
+  --muted-foreground: #5c5c60;         /* 6.4:1 on paper */
+  --accent: #ececea;                   /* hover bg */
+  --accent-foreground: #0b0b0b;
+  --hairline: #0b0b0b1f;
+
+  --primary: #c30b23;                  /* signal red, 6.1:1 with white text */
+  --primary-foreground: #ffffff;
+  --primary-hover: #a8091e;
+  --primary-active: #8d0719;
+  --primary-emphasis: #a8091e;
+  --primary-subtle: #ffe9eb;           /* soft pink */
+  --primary-subtle-foreground: #a8091e;
+  --green-bright: #c30b23;             /* the vivid accent slot: dots, progress, ring */
+
+  --destructive: #8d0719;
+  --destructive-foreground: #ffffff;
+  --destructive-subtle: #ffe9eb;
+  --info: #2b2b2e;
+  --info-foreground: #ffffff;
+  --info-subtle: #ececea;
+  --success: #c30b23;
+  --success-subtle: #ffe9eb;
+
+  --border: #d5d5d7;                   /* grey */
+  --input: #c9c9cc;
+  --ring: #c30b23;
+
+  --chart-1: #c30b23;
+  --chart-2: #0b0b0b;
+  --chart-3: #8a8a8e;
+  --chart-4: #f2788a;
+  --chart-5: #d5d5d7;
+
+  --sidebar: #f4f4f1;
+  --sidebar-foreground: #0b0b0b;
+  --sidebar-primary: #c30b23;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #ffe9eb;
+  --sidebar-accent-foreground: #a8091e;
+  --sidebar-border: #e2e2e0;
+  --sidebar-ring: #c30b23;
+
+  --radius: 0.5rem;                    /* flatter, paper-like corners */
+
+  --shadow-card: 0 0 0 1px #0b0b0b14, 0 1px 2px -1px #0b0b0b12;
+  --shadow-card-hover: 0 0 0 1px #0b0b0b26, 0 2px 6px -2px #0b0b0b1a, 0 12px 24px -12px #0b0b0b26;
+  --filter-card: drop-shadow(0 0 1px #0b0b0b26) drop-shadow(0 1px 2px #0b0b0b12);
+  --filter-card-hover: drop-shadow(0 0 1px #0b0b0b33) drop-shadow(0 6px 14px #0b0b0b1a);
+  --glow-primary: 0 0 0 1px #c30b233d, 0 6px 20px -6px #c30b2352;
+}
+
+/* – Dark –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– */
+:root.dark {
+  --background: #0b0b0b;
+  --foreground: #fbfbf9;
+  --card: #161616;
+  --card-foreground: #fbfbf9;
+  --popover: #171717;
+  --popover-foreground: #fbfbf9;
+  --secondary: #1d1d1d;
+  --secondary-foreground: #fbfbf9;
+  --muted: #1d1d1d;
+  --muted-foreground: #a7a7aa;
+  --accent: #262626;
+  --accent-foreground: #fbfbf9;
+  --hairline: #ffffff14;
+
+  --primary: #ff3b52;                  /* red lifted for contrast on ink */
+  --primary-foreground: #0b0b0b;
+  --primary-hover: #ff5568;
+  --primary-active: #ff7083;
+  --primary-emphasis: #ff7083;
+  --primary-subtle: #2b0a10;
+  --primary-subtle-foreground: #ff8a99;
+  --green-bright: #ff3b52;
+
+  --info: #d5d5d7;
+  --info-foreground: #0b0b0b;
+  --info-subtle: #1d1d1d;
+  --success: #ff3b52;
+  --success-subtle: #2b0a10;
+
+  --border: #262626;
+  --input: #2e2e2e;
+  --ring: #ff3b52;
+
+  --chart-1: #ff3b52;
+  --chart-2: #fbfbf9;
+  --chart-3: #8a8a8e;
+  --chart-4: #ff8a99;
+  --chart-5: #3a3a3c;
+
+  --sidebar: #111111;
+  --sidebar-foreground: #fbfbf9;
+  --sidebar-primary: #ff3b52;
+  --sidebar-primary-foreground: #0b0b0b;
+  --sidebar-accent: #2b0a10;
+  --sidebar-accent-foreground: #ff8a99;
+  --sidebar-border: #232323;
+  --sidebar-ring: #ff3b52;
+
+  --radius: 0.5rem;
+  --glow-primary: 0 0 0 1px #ff3b5247, 0 6px 22px -6px #ff3b524d;
+}
+
+/* – Type roles ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+   Headings: Playfair Display, weights eased by 0.85 so a 700 heading lands
+   near 600 and the high-contrast serif stays light on paper.
+   Tags: Unbounded, eased by 0.8 and normalised to a smaller x-height so a
+   wide display face fits inside a badge.
+   Counters: the self-hosted JetBrains Mono bundle from typography.css.
+   Body text keeps the house Inter for long reading. */
+:root:root {
+  --type-heading-family: var(--font-club-display), "Playfair Display", Georgia, serif;
+  --type-heading-stretch: 100%;
+  --type-heading-wa: 0.85;
+  --type-heading-wb: 0;
+  --type-heading-size-adjust: none;
+  --type-heading-caps-adjust: none;
+  --type-heading-features: "kern", "lnum";
+  --type-heading-df: 0.3;
+  --type-heading-cf: 1;
+  --type-heading-leading: 1;
+
+  --type-tag-family: var(--font-club-ui), "Unbounded", var(--font-inter), system-ui, sans-serif;
+  --type-tag-stretch: 100%;
+  --type-tag-wa: 0.8;
+  --type-tag-wb: 0;
+  --type-tag-size-adjust: 0.48;
+  --type-tag-caps-adjust: none;
+  --type-tag-features: "kern";
+  --type-tag-df: 0;
+  --type-tag-cf: 0.6;
+  --type-tag-leading: 1;
+
+  --type-counter-family: var(--f-jetbrains-mono-counter-family);
+  --type-counter-stretch: var(--f-jetbrains-mono-counter-stretch);
+  --type-counter-wa: var(--f-jetbrains-mono-counter-wa);
+  --type-counter-wb: var(--f-jetbrains-mono-counter-wb);
+  --type-counter-size-adjust: var(--f-jetbrains-mono-counter-size-adjust);
+  --type-counter-caps-adjust: var(--f-jetbrains-mono-counter-caps-adjust);
+  --type-counter-features: var(--f-jetbrains-mono-counter-features);
+  --type-counter-df: var(--f-jetbrains-mono-counter-df);
+  --type-counter-cf: var(--f-jetbrains-mono-counter-cf);
+  --type-counter-leading: var(--f-jetbrains-mono-counter-leading);
+
+  --font-mono: "Radaric JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+
+/* UI labels in Unbounded: buttons and the main navigation take the tag role. */
+:root [data-slot="button"],
+:root nav[aria-label="Main navigation"] a {
+  --type-wa: var(--type-tag-wa);
+  --type-wb: var(--type-tag-wb);
+  --type-df: var(--type-tag-df);
+  --type-cf: var(--type-tag-cf);
+  font-family: var(--type-tag-family);
+  font-size-adjust: var(--type-tag-size-adjust);
+  font-feature-settings: var(--type-tag-features);
+}
