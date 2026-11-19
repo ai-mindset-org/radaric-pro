@@ -1,10 +1,10 @@
 # Contributing
 
-Radaric is **source-available** under the Functional Source License
-(FSL-1.1-ALv2 — see [LICENSE](LICENSE)): you can read, run, modify and
-self-host it, including inside a company. Because FSL lets the maintainer
-relicense the code (that is what makes the promised future Apache-2.0
-conversion meaningful), contributed code must arrive with the right to do so.
+Radaric is open source under the GNU Affero General Public License v3.0
+(AGPL-3.0-only, see [LICENSE](../LICENSE)): you can read, run, modify and
+self-host it, including inside a company. The maintainer also runs the paid
+hosted service and may offer the code under other terms, so contributed code
+must arrive with the right to do so: that is what the CLA grants.
 
 ## Contributions
 
@@ -19,7 +19,7 @@ conversion meaningful), contributed code must arrive with the right to do so.
 ## Development
 
 Requirements: Node 22.23.4+ (or 24.22.1+ / 26.12.1+) and PostgreSQL 16 or newer. The Docker route is in
-[SELF_HOSTING.md](SELF_HOSTING.md).
+[SELF_HOSTING.md](../SELF_HOSTING.md).
 
 ```bash
 npm ci

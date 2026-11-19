@@ -71,8 +71,10 @@ const HOSTED_STRUCTURED_DATA = {
         "Feedback-based learning from every approval and rejection",
         "Story aggregation across sources",
         "Notion export",
+        "Self-hosting with Docker Compose",
       ],
       offers: [
+        { "@type": "Offer", name: "Self-hosted", price: "0", priceCurrency: "USD", url: "https://radaric.pro/" },
         { "@type": "Offer", name: "Lite", price: "9", priceCurrency: "USD", url: "https://radaric.pro/" },
         { "@type": "Offer", name: "Pro", price: "59", priceCurrency: "USD", url: "https://radaric.pro/" },
       ],

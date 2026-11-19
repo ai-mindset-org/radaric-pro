@@ -6,10 +6,9 @@
 
 Thank you for your interest in contributing to Radaric. This agreement will let
 the maintainer, Kirill Oleinichenko, distribute contributions under the
-project's license (FSL-1.1-ALv2, each version converting to Apache-2.0 two years
-after its release) and also offer Radaric commercially — including the paid
-hosted service and commercial licenses. You keep the copyright in your
-contribution.
+project's license (AGPL-3.0-only) and also offer Radaric commercially,
+including the paid hosted service and commercial licenses. You keep the
+copyright in your contribution.
 
 By signing this agreement (or submitting a contribution after agreeing to it in
 writing), You accept the following terms for any contribution You submit.
@@ -20,8 +19,10 @@ writing), You accept the following terms for any contribution You submit.
    and distribute Your contributions and derivative works.
 
 2. **Right to relicense.** You agree the maintainer may license Your
-   contribution under the project's current license and any later license
-   version, and may include it in a commercially licensed offering.
+   contribution under any terms, including AGPL-3.0-only, any other open source
+   license, and proprietary or commercial licenses, and may use it in the
+   hosted service at radaric.pro without the obligations of section 13 of the
+   AGPL.
 
 3. **Patent license.** You grant a perpetual, worldwide, non-exclusive,
    royalty-free, irrevocable patent license to make, use, sell, offer for sale,

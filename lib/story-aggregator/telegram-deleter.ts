@@ -9,6 +9,8 @@
  *   shouldDeleteTelegramMessages(item) — pure guard function
  *   deleteTelegramMessages(messageIds, deps) — GramJS wrapper, never throws
  *   maybeDeleteTelegramMessage(itemId, deps) — full orchestration
+ *   sweepUndeletedTelegramMessages(deps) — retry sweep for PROCESSED items
+ *     whose post-save deletion failed (last 7 days, 20 per run)
  */
 
 // ---------------------------------------------------------------------------
@@ -22,6 +24,7 @@ export interface InboxItemForDeletion {
   allMessageIds: number[]
   status: string
   telegramDeletedAt: Date | null
+  storyId?: string | null
 }
 
 export interface DeleteDeps {
@@ -34,6 +37,36 @@ export interface DeleteDeps {
   gramjsClient: GramJSClient | null
   channelId: string
   autoDeleteEnabled: boolean
+}
+
+export interface SweepDeps {
+  db: {
+    inboxItem: {
+      findMany: (args: {
+        where: {
+          userId: string
+          externalId: { startsWith: string }
+          messageId: { not: number }
+          allMessageIds: { isEmpty: boolean }
+          status: "PROCESSED"
+          telegramDeletedAt: null
+          story: { notionPageId: { not: null } }
+          createdAt: { gte: Date }
+        }
+        take: number
+        orderBy: { createdAt: "asc" }
+      }) => Promise<InboxItemForDeletion[]>
+      findUnique?: (args: { where: { id: string } }) => Promise<InboxItemForDeletion | null>
+      update: (args: { where: { id: string }; data: Record<string, unknown> }) => Promise<unknown>
+    }
+  }
+  gramjsClient: GramJSClient | null
+  channelId: string
+  userId: string
+  autoDeleteEnabled: boolean
+  now?: () => Date
+  /** Checked before the query and before every item; true stops the sweep (client teardown). */
+  shouldAbort?: () => boolean
 }
 
 export interface GramJSClient {
@@ -165,4 +198,101 @@ export async function maybeDeleteTelegramMessage(
     const msg = error instanceof Error ? error.message : String(error)
     console.warn(`[TelegramDeleter] Error in maybeDeleteTelegramMessage for ${itemId}: ${msg}`)
   }
+}
+
+// ---------------------------------------------------------------------------
+// sweepUndeletedTelegramMessages — retry sweep
+// ---------------------------------------------------------------------------
+
+const SWEEP_WINDOW_MS = 7 * 24 * 60 * 60 * 1000
+const SWEEP_BATCH_SIZE = 20
+
+/**
+ * Re-attempt deletion for PROCESSED items with a confirmed Notion save whose
+ * single post-save deletion attempt failed (telegramDeletedAt still null).
+ * Bounded to items created in the last 7 days, 20 per run, oldest first, and
+ * to items whose externalId belongs to the configured channel.
+ * When findUnique is provided, each item is re-read right before deletion and
+ * skipped if it changed since the batch was read.
+ * Returns the number of items deleted. Never throws.
+ */
+export async function sweepUndeletedTelegramMessages(deps: SweepDeps): Promise<number> {
+  if (!deps.autoDeleteEnabled) return 0
+  if (!deps.gramjsClient) return 0
+  if (!deps.channelId) return 0
+
+  const gramjsClient = deps.gramjsClient
+  const now = deps.now ? deps.now() : new Date()
+  const channelPrefix = `${deps.channelId}:`
+
+  if (deps.shouldAbort?.()) return 0
+
+  let items: InboxItemForDeletion[]
+  try {
+    items = await deps.db.inboxItem.findMany({
+      where: {
+        userId: deps.userId,
+        externalId: { startsWith: channelPrefix },
+        messageId: { not: 0 },
+        allMessageIds: { isEmpty: false },
+        status: "PROCESSED",
+        telegramDeletedAt: null,
+        story: { notionPageId: { not: null } },
+        createdAt: { gte: new Date(now.getTime() - SWEEP_WINDOW_MS) },
+      },
+      take: SWEEP_BATCH_SIZE,
+      orderBy: { createdAt: "asc" },
+    })
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error)
+    console.warn(`[TelegramDeleter] Sweep query failed: ${msg}`)
+    return 0
+  }
+
+  let deletedCount = 0
+  for (const item of items) {
+    if (deps.shouldAbort?.()) break
+    if (!item.externalId.startsWith(channelPrefix)) continue
+    if (!shouldDeleteTelegramMessages(item)) continue
+
+    let messageIds = item.allMessageIds
+    if (deps.db.inboxItem.findUnique) {
+      let fresh: InboxItemForDeletion | null
+      try {
+        fresh = await deps.db.inboxItem.findUnique({ where: { id: item.id } })
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error)
+        console.warn(`[TelegramDeleter] Sweep: re-read failed for ${item.id}, skipping: ${msg}`)
+        continue
+      }
+      if (!fresh) continue
+      if (fresh.status !== "PROCESSED") continue
+      if (!shouldDeleteTelegramMessages(fresh)) continue
+      if (fresh.storyId == null) continue
+      if (item.storyId !== undefined && fresh.storyId !== item.storyId) continue
+      messageIds = fresh.allMessageIds
+    }
+
+    const deleted = await deleteTelegramMessages(messageIds, {
+      gramjsClient,
+      channelId: deps.channelId,
+    })
+    if (!deleted) continue
+
+    try {
+      await deps.db.inboxItem.update({
+        where: { id: item.id },
+        data: { telegramDeletedAt: new Date() },
+      })
+      deletedCount++
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error)
+      console.warn(`[TelegramDeleter] Sweep: deleted messages for ${item.id} but failed to stamp telegramDeletedAt: ${msg}`)
+    }
+  }
+
+  if (deletedCount > 0) {
+    console.log(`[TelegramDeleter] Sweep: deleted ${deletedCount} leftover item(s)`)
+  }
+  return deletedCount
 }

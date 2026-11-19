@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/nextjs"
+
 export async function register() {
   // RAD-285: the AUTH_USER / AUTH_PASSWORD_HASH virtual-admin fallback was
   // removed — it authenticated a user id with no User row, so every DB lookup
@@ -11,11 +13,15 @@ export async function register() {
     )
   }
 
-  if (process.env.NEXT_RUNTIME === "nodejs") {
-    await import("./sentry.server.config");
-  }
-
-  if (process.env.NEXT_RUNTIME === "edge") {
-    await import("./sentry.edge.config");
+  // Server and edge runtimes share one Sentry config. Off outside production
+  // and while SENTRY_DSN is unset, so a self-hosted build reports nowhere.
+  // There is no browser-side Sentry: under Turbopack it would need an
+  // instrumentation-client.ts, and the privacy policy does not name Sentry.
+  if (process.env.NEXT_RUNTIME === "nodejs" || process.env.NEXT_RUNTIME === "edge") {
+    Sentry.init({
+      dsn: process.env.SENTRY_DSN,
+      tracesSampleRate: 0.1,
+      enabled: process.env.NODE_ENV === "production",
+    })
   }
 }

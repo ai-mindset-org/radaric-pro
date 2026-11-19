@@ -36,7 +36,7 @@ import {
   downloadMediaBatch,
 } from "./worker-helpers"
 import { channelInfo, parseChannelResponse } from "./telegram-proxy"
-import { maybeDeleteTelegramMessage } from "./telegram-deleter"
+import { maybeDeleteTelegramMessage, sweepUndeletedTelegramMessages } from "./telegram-deleter"
 import { previewImageUrl } from "@/lib/media-urls"
 import { openNotionToken } from "@/lib/notion-token"
 import { resolveModelForStage, requiresAnthropicKey, buildProviderOptions } from "@/lib/models/registry"
@@ -82,6 +82,7 @@ let watchdogInterval: ReturnType<typeof setInterval> | null = null
 let gapScanInterval: ReturnType<typeof setInterval> | null = null
 let selfFillingSweepInterval: ReturnType<typeof setInterval> | null = null
 let isReconnecting = false
+let telegramSweepRunning = false
 let workerChannelId: string | null = null
 let workerChannelUsername: string | null = null
 let workerUserId: string | null = null
@@ -798,6 +799,34 @@ function startGapScan(): void {
     }
 
     await runGapScan(channelId, channelUn, userId, deps, { isReconnecting, gramjsClient })
+
+    // Retry Telegram deletion for saved posts whose post-save attempt failed.
+    // Only for the worker's own channel, only while this client is still live.
+    if (telegramSweepRunning) return
+    telegramSweepRunning = true
+    try {
+      const userSettings = await db.userSettings.findUnique({ where: { userId } })
+      if (userSettings && userSettings.storyInboxChannelId === channelId && !isReconnecting && gramjsClient === client) {
+        await sweepUndeletedTelegramMessages({
+          db: {
+            inboxItem: {
+              findMany: (args) => db.inboxItem.findMany(args),
+              findUnique: (args) => db.inboxItem.findUnique(args),
+              update: (args) => db.inboxItem.update(args),
+            },
+          },
+          gramjsClient: client,
+          channelId,
+          userId,
+          autoDeleteEnabled: userSettings.autoDeleteTelegramMessages ?? false,
+          shouldAbort: () => isReconnecting || gramjsClient !== client,
+        })
+      }
+    } catch (error) {
+      console.warn("[Worker] Telegram deletion sweep error:", error)
+    } finally {
+      telegramSweepRunning = false
+    }
   }, GAP_SCAN_INTERVAL_MS)
 
   console.log("[Worker] Gap scan started (5-min interval)")

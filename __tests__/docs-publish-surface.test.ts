@@ -7,8 +7,8 @@
  * README. README once claimed MIT while the repo had no LICENSE at all, so the
  * properties that matter are pinned, not just the files' existence:
  *
- *  - LICENSE is the canonical FSL-1.1-ALv2 text (hash-pinned) with the licensor
- *    line as the only edit — a deleted clause fails CI;
+ *  - LICENSE is the verbatim GNU AGPL-3.0 text (hash-pinned) — a deleted or
+ *    edited clause fails CI;
  *  - NOTICE's Trademarks section carries the brand boundary the code license
  *    does not;
  *  - SECURITY.md names an address on a domain that actually receives mail, plus
@@ -26,22 +26,19 @@ import { describe, it, expect } from "vitest"
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const read = (f: string) => readFileSync(path.join(root, f), "utf8")
 
-// sed -E 's/^Copyright [0-9]{4} .+$/Copyright <year> <licensor name>/' LICENSE | shasum -a 256
-const CANONICAL_LICENSE_SHA256 = "67a3409bc733d05713499d75aad69cc6a43d2e0123936f2fb00eec70703b1896"
+// shasum -a 256 LICENSE — the file is https://www.gnu.org/licenses/agpl-3.0.txt, byte for byte
+const CANONICAL_LICENSE_SHA256 = "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0"
 
 const license = read("LICENSE")
 const notice = read("NOTICE")
-const security = read("SECURITY.md")
-const contributing = read("CONTRIBUTING.md")
+const security = read(".github/SECURITY.md")
+const contributing = read(".github/CONTRIBUTING.md")
 const readme = read("README.md")
 const selfHosting = read("SELF_HOSTING.md")
 
 describe("LICENSE", () => {
-  it("is the canonical FSL-1.1-ALv2 text, licensor line the only edit", () => {
-    const normalized = license.replace(/^Copyright \d{4} .+$/m, "Copyright <year> <licensor name>")
-    expect(createHash("sha256").update(normalized).digest("hex")).toBe(CANONICAL_LICENSE_SHA256)
-    expect(license).toMatch(/^Copyright \d{4} .+$/m)
-    expect(license).not.toContain("${")
+  it("is the verbatim GNU AGPL-3.0 text", () => {
+    expect(createHash("sha256").update(license).digest("hex")).toBe(CANONICAL_LICENSE_SHA256)
   })
 })
 
@@ -52,15 +49,25 @@ describe("NOTICE", () => {
     expect(notice).toContain("radaric.pro")
   })
 
-  it("records the per-version Change Date policy", () => {
-    expect(notice).toContain("Change Date")
-    expect(notice.toLowerCase()).toContain("source-available")
+  it("names the license, its SPDX id and the copyright holder", () => {
+    expect(notice).toContain("GNU Affero General Public License")
+    expect(notice).toContain("AGPL-3.0-only")
+    expect(notice).toContain("Copyright 2026 Kirill Oleinichenko")
   })
 
-  it("records the first public release date and its Change Date", () => {
-    expect(notice).toContain("First public release: **2026-11-18**")
-    expect(notice).toContain("Change Date is **2028-11-18**")
-    expect(notice).not.toContain("to be recorded")
+  it("keeps the grant of both releases published under FSL, and only there", () => {
+    const [head, earlier] = notice.split("## Earlier releases")
+    expect(earlier).toBeDefined()
+    for (const s of ["FSL-1.1-ALv2", "`cb3ac6a`", "Change Date is 2028-11-18", "`222c337`", "Change Date is 2028-11-19"]) {
+      expect(earlier).toContain(s)
+    }
+    expect(head).not.toMatch(/FSL|source-available|Change Date/i)
+  })
+
+  it("frames the brand terms as section 7 additional terms and excludes the brand images", () => {
+    expect(notice).toContain("section 7(e)")
+    expect(notice).toContain("section 7(c)")
+    for (const f of ["app/icon.png", "app/apple-icon.png", "public/og-image.png"]) expect(notice).toContain(f)
   })
 
   it("says the landing screenshots show publishers' content", () => {
@@ -90,8 +97,11 @@ describe("SECURITY.md", () => {
 })
 
 describe("README + CONTRIBUTING + SELF_HOSTING + package metadata", () => {
-  it("README labels the project source-available, links the surfaces, and claims no other license", () => {
-    expect(readme.toLowerCase()).toContain("source-available")
+  it("README labels the project open source under AGPL-3.0, links the surfaces, and claims no other license", () => {
+    expect(readme).toContain("AGPL-3.0")
+    expect(readme.toLowerCase()).toContain("open source")
+    expect(readme.toLowerCase()).not.toContain("source-available")
+    expect(readme).not.toContain("FSL")
     expect(readme).not.toMatch(/\bMIT\b/)
     for (const f of ["NOTICE", "SECURITY.md", "CONTRIBUTING.md", "SELF_HOSTING.md"]) {
       expect(readme).toContain(f)
@@ -100,7 +110,7 @@ describe("README + CONTRIBUTING + SELF_HOSTING + package metadata", () => {
 
   it("package.json carries the license field", () => {
     const pkg = JSON.parse(read("package.json"))
-    expect(pkg.license).toMatch(/FSL-1\.1-ALv2|SEE LICENSE/)
+    expect(pkg.license).toBe("AGPL-3.0-only")
   })
 
   it("CONTRIBUTING describes the CLA, links it, and includes the env step", () => {
@@ -110,12 +120,22 @@ describe("README + CONTRIBUTING + SELF_HOSTING + package metadata", () => {
     expect(contributing).toContain("SECURITY.md")
   })
 
+  it("no published surface still names the FSL as the current license", () => {
+    for (const f of ["README.md", ".github/CONTRIBUTING.md", ".github/CLA.md", "SELF_HOSTING.md", "app/page.tsx", "docs/INDEX.md"]) {
+      expect(read(f), f).not.toMatch(/FSL|Functional Source|source-available/i)
+    }
+  })
+
+  it("SELF_HOSTING tells a modified network instance to offer its source", () => {
+    expect(selfHosting.replace(/\s+/g, " ")).toMatch(/section 13 of the license requires you to offer/i)
+  })
+
   it("SELF_HOSTING tells operators not to present as Radaric", () => {
     expect(selfHosting.replace(/\s+/g, " ")).toContain("present it as the Radaric service")
   })
 
-  it("the surface files exist at the repo root", () => {
-    for (const f of ["LICENSE", "NOTICE", "SECURITY.md", "CONTRIBUTING.md", "CLA.md", "SELF_HOSTING.md"]) {
+  it("the surface files exist where GitHub and a reader look for them", () => {
+    for (const f of ["LICENSE", "NOTICE", ".github/SECURITY.md", ".github/CONTRIBUTING.md", ".github/CLA.md", "SELF_HOSTING.md"]) {
       expect(existsSync(path.join(root, f)), `${f} must exist`).toBe(true)
     }
   })

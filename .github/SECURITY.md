@@ -33,4 +33,4 @@ vulnerabilities in third-party services themselves.
 Self-hosted instances are operated by their owners, not by us. If you run
 Radaric yourself, you are responsible for its secrets (`NEXTAUTH_SECRET`,
 database credentials, API keys) and for keeping the image updated. See
-[SELF_HOSTING.md](SELF_HOSTING.md).
+[SELF_HOSTING.md](../SELF_HOSTING.md).

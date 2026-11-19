@@ -103,7 +103,7 @@ describe("UserSettings.typography — schema and migration", () => {
     const baseline = readdirSync(migrationsDir, { withFileTypes: true })
       .find((entry) => entry.isDirectory() && entry.name.endsWith("_public_baseline"))
     if (baseline) {
-      // The source-available tree squashes the migration history into one
+      // The public tree squashes the migration history into one
       // baseline, so there the column is created with the table itself.
       const sql = readFileSync(join(migrationsDir, baseline.name, "migration.sql"), "utf8")
       const table = sql.match(/CREATE TABLE "user_settings" \(([\s\S]*?)\n\);/)

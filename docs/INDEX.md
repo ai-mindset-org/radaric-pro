@@ -6,8 +6,8 @@
 |---|---|
 | [README.md](../README.md) | What Radaric is, stack, quick start |
 | [SELF_HOSTING.md](../SELF_HOSTING.md) | Self-hosting guide: Docker quick start, minimum env set, feature-to-key map |
-| [CONTRIBUTING.md](../CONTRIBUTING.md) | Dev loop, conventions, CLA |
-| [SECURITY.md](../SECURITY.md) | Reporting a vulnerability (not in a public issue) |
+| [CONTRIBUTING.md](../.github/CONTRIBUTING.md) | Dev loop, conventions, CLA |
+| [SECURITY.md](../.github/SECURITY.md) | Reporting a vulnerability (not in a public issue) |
 
 ## Product
 
@@ -54,6 +54,6 @@
 
 | Doc | Contents |
 |---|---|
-| [LICENSE](../LICENSE) | FSL-1.1-ALv2 |
-| [NOTICE](../NOTICE) | Brand boundary: the FSL covers the code, not the brand |
-| [CLA.md](../CLA.md) | Contributor License Agreement (draft — signing not open yet) |
+| [LICENSE](../LICENSE) | AGPL-3.0-only |
+| [NOTICE](../NOTICE) | Copyright, the earlier releases and their license, the brand terms, third-party notices |
+| [CLA.md](../.github/CLA.md) | Contributor License Agreement (draft — signing not open yet) |

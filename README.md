@@ -4,8 +4,8 @@ An intelligent assistant for content curators. Radaric collects items from
 hundreds of sources, filters them against your own editorial criteria with AI,
 groups matching posts into stories, and learns continuously from your feedback.
 
-Source-available: read, run, modify and self-host it (including inside a
-company). You may not sell a competing hosted service — see [License](#license).
+Open source under AGPL-3.0: read, run, modify and self-host it, including
+inside a company — see [License](#license).
 
 ## What it does
 
@@ -95,6 +95,25 @@ start. With `.env` in place it is:
 docker compose up -d --build
 ```
 
+## Repository layout
+
+| Path | What lives there |
+|---|---|
+| `app/` | Next.js App Router: pages, layouts and the `api/` route handlers |
+| `components/` | React components; `components/ui/` holds the shadcn/ui primitives |
+| `lib/` | Server and shared logic: parsers, the AI pipeline, auth, billing; the background worker is `lib/story-aggregator/worker.ts` |
+| `prisma/` | Database schema and migrations |
+| `scripts/` | Operator scripts (env generation, user creation, the token-encryption backfill) and the container entrypoint |
+| `public/` | Static assets served as-is |
+| `__tests__/` · `e2e/` | Vitest unit and integration tests · Playwright end-to-end tests |
+| `docs/` | Architecture, features, API and setup guides |
+| `.github/` | Contributing guide, security policy, CLA draft, CI workflows |
+| `proxy.ts` · `instrumentation.ts` | Request middleware (auth gate, redirects) · server-side Sentry and boot-time checks |
+
+The remaining root files are the tool configs (Next.js, TypeScript, PostCSS,
+shadcn/ui, ESLint, Vitest, Playwright, Docker, Railway), the env template, and
+the license and self-hosting docs.
+
 ## Documentation
 
 | Doc | Contents |
@@ -106,13 +125,14 @@ docker compose up -d --build
 | [docs/API_REFERENCE.md](docs/API_REFERENCE.md) | REST API endpoints |
 | [docs/TELEGRAM_SETUP.md](docs/TELEGRAM_SETUP.md) | Telegram integration setup |
 | [docs/AuthSystem.md](docs/AuthSystem.md) | Auth system (NextAuth v5, sessions, OAuth) |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute |
-| [SECURITY.md](SECURITY.md) | Reporting a vulnerability (please not in a public issue) |
+| [CONTRIBUTING.md](.github/CONTRIBUTING.md) | How to contribute |
+| [SECURITY.md](.github/SECURITY.md) | Reporting a vulnerability (please not in a public issue) |
 
 ## License
 
-**Source-available, not open source.** The code is licensed under
-[FSL-1.1-ALv2](LICENSE): you can read it, run it, modify it and host it
-yourself — including inside a company — but you may not offer a competing
-service. The brand and the `radaric.pro` domain are not covered by the license;
+Open source under the [GNU Affero General Public License v3.0](LICENSE)
+(AGPL-3.0-only). You can read, run, modify and host the code yourself,
+including inside a company. If you change it and let other people use your
+instance over a network, section 13 of the license requires you to offer them
+the complete source of your modified version. The brand and the `radaric.pro` domain are not covered by the license;
 see [NOTICE](NOTICE).

@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 // state the product, and they must not drift apart.
 const LANDING_TITLE = "Radaric — Your content taste, but scaled"
 const LANDING_DESCRIPTION =
-  "Stop scrolling and start reading what’s really worth it. AI learns from every approve and reject across RSS, Telegram, YouTube and X. From $9/mo, X on Pro."
+  "Stop scrolling and start reading what’s really worth it. AI learns from every approve and reject across RSS, Telegram, YouTube and X. Free on your own server, hosted from $9/mo."
 const OG_TITLE = "Your content taste, but scaled"
 const OG_DESCRIPTION = "Stop scrolling and start reading what’s really worth it."
 
@@ -98,8 +98,16 @@ export function buildLandingStructuredData(siteUrl: string) {
           "Feedback-based learning from every approval and rejection",
           "Story aggregation across sources",
           "Notion export",
+          "Self-hosting with Docker Compose",
         ],
         offers: [
+          {
+            "@type": "Offer",
+            name: "Self-hosted",
+            price: "0",
+            priceCurrency: "USD",
+            url: `${siteUrl}/`,
+          },
           {
             "@type": "Offer",
             name: "Lite",
