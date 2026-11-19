@@ -43,6 +43,14 @@ export interface ParseRunHandle {
 /** Finished runs stay visible this long. */
 export const RUN_RETENTION_MS = 15 * 60_000
 
+/**
+ * Longest a run may hold the per-user lock. Each source has a 180 s watchdog and
+ * five run at once, so a healthy run of a few dozen sources finishes well inside
+ * this; anything older is a run nobody will settle. Override with
+ * PARSE_RUN_STALE_MS.
+ */
+export const RUN_STALE_MS = Number(process.env.PARSE_RUN_STALE_MS) || 10 * 60_000
+
 interface ParseRunEntry {
   snapshot: ParseRunSnapshot
   stopRequested: boolean
@@ -90,7 +98,16 @@ export function beginParseRun(userId: string, total: number): ParseRunHandle | n
   evictExpired(now)
 
   const existing = runsByUser.get(userId)
-  if (existing && existing.snapshot.status === "running") return null
+  if (existing && existing.snapshot.status === "running") {
+    // A live run blocks a new one. A run still "running" past RUN_STALE_MS is
+    // treated as abandoned (a hung source, a dropped stream, a crash between
+    // claim and settle): it is closed as stopped and the new run takes over,
+    // so "A parse is already running" cannot stick until the process restarts.
+    if (now - existing.snapshot.startedAt < RUN_STALE_MS) return null
+    console.warn(`[ParseRuns] run ${existing.snapshot.id} running for ${Math.round((now - existing.snapshot.startedAt) / 1000)}s, closing as stale`)
+    existing.snapshot.status = "stopped"
+    existing.snapshot.finishedAt = now
+  }
 
   const entry: ParseRunEntry = {
     snapshot: {

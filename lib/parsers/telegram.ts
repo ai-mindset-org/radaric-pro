@@ -6,6 +6,7 @@ import { db } from "@/lib/db"
 import { isTelegramSessionState, type TelegramSessionState } from "@/lib/telegram-session-state"
 
 import type { ParsedItem } from "./rss"
+import { parseTelegramPublic } from "./telegram-public"
 
 export interface ParsedTelegramItem extends ParsedItem {
   messageId: number
@@ -249,6 +250,12 @@ export async function getTelegramSessionState(): Promise<TelegramSessionState> {
   }
 }
 
+/** The worker answered that no account session exists: none configured, or revoked. */
+async function hasNoTelegramAccount(): Promise<boolean> {
+  const state = await getTelegramSessionState()
+  return state === "unconfigured" || state === "invalid"
+}
+
 /**
  * Check if the Telegram session is live. Anything short of an active session —
  * including an unreachable worker — is not valid.
@@ -267,6 +274,14 @@ export async function parseTelegramChannel(
   limit: number = 20,
   skipMedia: boolean = false
 ): Promise<ParsedTelegramItem[]> {
+  // No Telegram account connected (or its session was revoked): read the public
+  // web preview t.me/s/<channel> instead of waiting on a worker that has no
+  // GramJS client. A worker that is unreachable or still starting keeps the
+  // worker path and its retries.
+  if (await hasNoTelegramAccount()) {
+    console.log(`[Telegram Parser] No active session, using public preview for ${channelUsername}`)
+    return parseTelegramPublic(extractChannelUsername(channelUsername), limit)
+  }
   return fetchWorkerWithRetry<ParsedTelegramItem[]>(
     `${WORKER_URL}/telegram/parse-channel`,
     {
@@ -293,6 +308,9 @@ export async function getTelegramChannelInfo(channelUsername: string): Promise<{
   imageUrl?: string
 }> {
   const cleanUsername = extractChannelUsername(channelUsername)
+  if (await hasNoTelegramAccount()) {
+    return { name: `@${cleanUsername}` }
+  }
   return fetchWorkerWithRetry(
     `${WORKER_URL}/telegram/channel-info?username=${encodeURIComponent(cleanUsername)}`,
     { signal: AbortSignal.timeout(15_000) },

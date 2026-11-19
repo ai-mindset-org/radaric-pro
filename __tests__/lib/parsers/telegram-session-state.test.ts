@@ -108,6 +108,8 @@ describe("fetchWorkerWithRetry — no retry on timeout (RAD-359)", () => {
 
     const { parseTelegramChannel } = await import("@/lib/parsers/telegram")
     await expect(parseTelegramChannel("@ch", 10)).rejects.toThrow(/timed out/i)
-    expect(fetchMock).toHaveBeenCalledTimes(1)
+    // One session probe (no-account fallback check), then exactly one parse attempt.
+    const parseCalls = fetchMock.mock.calls.filter(([url]) => String(url).includes("/telegram/parse-channel"))
+    expect(parseCalls).toHaveLength(1)
   })
 })
