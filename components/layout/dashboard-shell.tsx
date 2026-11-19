@@ -22,6 +22,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { LITE } from "@/lib/lite"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -195,7 +196,7 @@ export function DashboardShell({
                 from 2026-07-06 while the tracked-question ingestion was
                 stabilized; the webhook + monitor-evaluation fixes made it
                 collect again, so it is user-facing as designed. */}
-            <TopNavLink href="/saved" icon={Library} label="Library" />
+            {!LITE && <TopNavLink href="/saved" icon={Library} label="Library" />}
           </nav>
 
           {/* Profile menu */}
@@ -330,7 +331,7 @@ function ProfileMenu({ username, isAdmin }: { username?: string | null; isAdmin?
             Settings
           </Link>
         </DropdownMenuItem>
-        {isAdmin && (
+        {isAdmin && !LITE && (
           <DropdownMenuItem asChild>
             <Link href="/admin" className="flex items-center gap-2">
               <Shield className="h-[16px] w-[16px]" />

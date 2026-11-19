@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { LITE, LITE_HIDDEN_SOURCE_TYPES } from "@/lib/lite"
 import { Lock } from "lucide-react"
 import { FaRss, FaTelegram, FaXTwitter, FaYoutube } from "react-icons/fa6"
 import { TbWorldSearch } from "react-icons/tb"
@@ -100,7 +101,7 @@ export function FeedTypeCards({ includesTwitter = true }: { includesTwitter?: bo
   return (
     <div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        {SOURCE_TYPES.map((source) => (
+        {SOURCE_TYPES.filter((source) => !(LITE && LITE_HIDDEN_SOURCE_TYPES.has(source.type))).map((source) => (
           <SourceTypeCard
             key={source.type}
             {...source}
