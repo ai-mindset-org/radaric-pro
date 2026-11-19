@@ -255,8 +255,8 @@ otherwise looks healthy because the web probe alone stays green.
 ### Logs and error reporting
 
 Both processes log to stdout/stderr — use the platform's log viewer. Set
-`SENTRY_DSN` (and optionally `NEXT_PUBLIC_SENTRY_DSN`) to forward errors to
-Sentry.
+`SENTRY_DSN` to forward server-side errors to Sentry; there is no browser-side
+reporting.
 
 ## 7. Backups
 

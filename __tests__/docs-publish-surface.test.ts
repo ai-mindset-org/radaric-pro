@@ -31,8 +31,8 @@ const CANONICAL_LICENSE_SHA256 = "67a3409bc733d05713499d75aad69cc6a43d2e0123936f
 
 const license = read("LICENSE")
 const notice = read("NOTICE")
-const security = read("SECURITY.md")
-const contributing = read("CONTRIBUTING.md")
+const security = read(".github/SECURITY.md")
+const contributing = read(".github/CONTRIBUTING.md")
 const readme = read("README.md")
 const selfHosting = read("SELF_HOSTING.md")
 
@@ -114,8 +114,8 @@ describe("README + CONTRIBUTING + SELF_HOSTING + package metadata", () => {
     expect(selfHosting.replace(/\s+/g, " ")).toContain("present it as the Radaric service")
   })
 
-  it("the surface files exist at the repo root", () => {
-    for (const f of ["LICENSE", "NOTICE", "SECURITY.md", "CONTRIBUTING.md", "CLA.md", "SELF_HOSTING.md"]) {
+  it("the surface files exist where GitHub and a reader look for them", () => {
+    for (const f of ["LICENSE", "NOTICE", ".github/SECURITY.md", ".github/CONTRIBUTING.md", ".github/CLA.md", "SELF_HOSTING.md"]) {
       expect(existsSync(path.join(root, f)), `${f} must exist`).toBe(true)
     }
   })

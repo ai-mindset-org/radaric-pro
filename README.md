@@ -95,6 +95,25 @@ start. With `.env` in place it is:
 docker compose up -d --build
 ```
 
+## Repository layout
+
+| Path | What lives there |
+|---|---|
+| `app/` | Next.js App Router: pages, layouts and the `api/` route handlers |
+| `components/` | React components; `components/ui/` holds the shadcn/ui primitives |
+| `lib/` | Server and shared logic: parsers, the AI pipeline, auth, billing; the background worker is `lib/story-aggregator/worker.ts` |
+| `prisma/` | Database schema and migrations |
+| `scripts/` | Operator scripts (env generation, user creation, the token-encryption backfill) and the container entrypoint |
+| `public/` | Static assets served as-is |
+| `__tests__/` · `e2e/` | Vitest unit and integration tests · Playwright end-to-end tests |
+| `docs/` | Architecture, features, API and setup guides |
+| `.github/` | Contributing guide, security policy, CLA draft, CI workflows |
+| `proxy.ts` · `instrumentation.ts` | Request middleware (auth gate, redirects) · server-side Sentry and boot-time checks |
+
+The remaining root files are the tool configs (Next.js, TypeScript, PostCSS,
+shadcn/ui, ESLint, Vitest, Playwright, Docker, Railway), the env template, and
+the license and self-hosting docs.
+
 ## Documentation
 
 | Doc | Contents |
@@ -106,8 +125,8 @@ docker compose up -d --build
 | [docs/API_REFERENCE.md](docs/API_REFERENCE.md) | REST API endpoints |
 | [docs/TELEGRAM_SETUP.md](docs/TELEGRAM_SETUP.md) | Telegram integration setup |
 | [docs/AuthSystem.md](docs/AuthSystem.md) | Auth system (NextAuth v5, sessions, OAuth) |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute |
-| [SECURITY.md](SECURITY.md) | Reporting a vulnerability (please not in a public issue) |
+| [CONTRIBUTING.md](.github/CONTRIBUTING.md) | How to contribute |
+| [SECURITY.md](.github/SECURITY.md) | Reporting a vulnerability (please not in a public issue) |
 
 ## License
 

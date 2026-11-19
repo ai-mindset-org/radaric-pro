@@ -1,6 +1,6 @@
 # Integration tokens at rest
 
-How Radaric stores the third-party tokens users give it, and how to run, rotate and roll back the encryption. Reporting a vulnerability is covered by the root [`SECURITY.md`](../SECURITY.md).
+How Radaric stores the third-party tokens users give it, and how to run, rotate and roll back the encryption. Reporting a vulnerability is covered by [`.github/SECURITY.md`](../.github/SECURITY.md).
 
 ## What is protected
 

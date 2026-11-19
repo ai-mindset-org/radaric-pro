@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 import { SatelliteDish } from "lucide-react"
+import { SiGithub } from "react-icons/si"
 import { MobileStickyCta } from "@/components/landing/mobile-sticky-cta"
 import { SourceTypesStrip } from "@/components/landing/source-types-strip"
 import { cn } from "@/lib/utils"
@@ -10,6 +11,11 @@ import { buildLandingMetadata, buildLandingStructuredData } from "@/lib/seo"
 import { getSiteUrl } from "@/lib/site-url"
 import { getContactEmail } from "@/lib/contact"
 import { isSelfHosted } from "@/lib/self-hosted"
+import {
+  LICENSE_URL,
+  PUBLIC_REPO_URL,
+  SELF_HOSTING_GUIDE_URL,
+} from "@/lib/public-repo"
 
 // The landing already reads searchParams, so it renders per request; stating it
 // keeps the SELF_HOSTED redirect on the runtime env even if that changes.
@@ -17,28 +23,44 @@ export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = buildLandingMetadata(getSiteUrl())
 
+function ctaClass(primary: boolean, size: "default" | "lg") {
+  return cn(
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-sm text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50",
+    size === "lg" ? "h-11 rounded-md px-8" : "h-10 px-4 py-2",
+    primary
+      ? "bg-primary/15 text-primary hover:bg-primary/25"
+      : "bg-secondary text-secondary-foreground hover:bg-accent"
+  )
+}
+
 function CtaBtn({
   href,
   children,
   primary = true,
   size = "lg",
+  external = false,
 }: {
   href: string
   children: React.ReactNode
   primary?: boolean
   size?: "default" | "lg"
+  /** Off-site target (GitHub): a plain anchor, opened in a new tab. */
+  external?: boolean
 }) {
+  if (external) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+        className={ctaClass(primary, size)}
+      >
+        {children}
+      </a>
+    )
+  }
   return (
-    <Link
-      href={href}
-      className={cn(
-        "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-sm text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50",
-        size === "lg" ? "h-11 rounded-md px-8" : "h-10 px-4 py-2",
-        primary
-          ? "bg-primary/15 text-primary hover:bg-primary/25"
-          : "bg-secondary text-secondary-foreground hover:bg-accent"
-      )}
-    >
+    <Link href={href} className={ctaClass(primary, size)}>
       {children}
     </Link>
   )
@@ -138,6 +160,16 @@ export default async function Page({
           <SatelliteDish className="size-4 text-primary" aria-hidden />
         </Link>
         <nav className="flex items-center gap-1">
+          <a
+            href={PUBLIC_REPO_URL}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Radaric on GitHub"
+            className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-accent hover:text-foreground"
+          >
+            <SiGithub className="size-4" aria-hidden />
+            <span className="hidden sm:inline">GitHub</span>
+          </a>
           <Link
             href="/signup"
             prefetch={false}
@@ -164,7 +196,15 @@ export default async function Page({
         >
           {/* Hero */}
           <p className="pt-2 text-xs uppercase tracking-wider text-muted-foreground">
-            200 posts in. 20 stories worth reading out
+            Open source.{" "}
+            <a
+              href={PUBLIC_REPO_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="link"
+            >
+              The code is on GitHub
+            </a>
           </p>
 
           <h1 className="mt-4 mb-9 text-[2.25rem] leading-[1.1] font-bold tracking-[calc(-0.035em*var(--type-df,1))] sm:text-[2.625rem] sm:leading-[1.1] sm:tracking-[calc(-0.035em*var(--type-df,1))]">
@@ -216,6 +256,19 @@ export default async function Page({
                 7 days free, no card required
               </p>
             )}
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+              Prefer your own server? Run Radaric there for free with your own
+              AI keys:{" "}
+              <a
+                href={SELF_HOSTING_GUIDE_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="link"
+              >
+                self-hosting guide
+              </a>
+              .
+            </p>
           </div>
 
           <Figure
@@ -370,7 +423,13 @@ export default async function Page({
               </thead>
               <tbody>
                 {[
-                  ["Price", "$18/month", "$2,000+/month", "From $9/month"],
+                  [
+                    "Price",
+                    "$18/month",
+                    "$2,000+/month",
+                    "Free on your server, hosted from $9/month",
+                  ],
+                  ["Source code", "Closed", "—", "Public on GitHub"],
                   ["Telegram private", "No", "Manual", "Yes, automated"],
                   [
                     "Learns your taste",
@@ -399,12 +458,52 @@ export default async function Page({
 
           {/* Pricing */}
           <h2 className="mt-16 mb-4 text-[1.625rem] leading-[1.2] font-bold tracking-[calc(-0.01em*var(--type-df,1))] sm:text-2xl sm:leading-snug sm:tracking-tight">
-            Try it for 30 days. If it doesn&apos;t save you hours, get your
-            money back.
+            Run it yourself for free, or let us host it
           </h2>
 
-          <div className="my-8 grid gap-6 sm:grid-cols-2">
-            <div className="rounded-xl border border-border bg-card p-6">
+          {/* Stacked cards keep the 680px text column; three across need the
+              wide one. */}
+          <div className="my-8 grid gap-6 lg:!max-w-[1100px] lg:grid-cols-3">
+            <div className="flex flex-col rounded-xl border border-border bg-card p-6">
+              <h3 className="text-[1.375rem] font-bold sm:text-xl">Self-hosted</h3>
+              <p className="mt-3">
+                <span className="text-3xl font-bold tracking-tight">$0</span>{" "}
+                <span className="text-sm text-muted-foreground">on your own server</span>
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                You pay your AI provider directly.
+              </p>
+              <ul className="mt-4 space-y-1.5 pl-5 text-sm leading-relaxed [&>li]:list-disc marker:text-muted-foreground/50">
+                <li>Every feature, Twitter/X included</li>
+                <li>
+                  Bring your own keys: OpenRouter or Anthropic for the AI,
+                  TwitterAPI.io for X, a Telegram account for channels
+                </li>
+                <li>Starts with one Docker Compose command</li>
+                <li>Your feeds and data stay on your machine</li>
+                <li>Questions and fixes go through GitHub issues</li>
+                <li>
+                  Free for you and your company under{" "}
+                  <a
+                    href={LICENSE_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="link whitespace-nowrap"
+                  >
+                    FSL-1.1
+                  </a>
+                  ; reselling it as a hosted service is not allowed
+                </li>
+              </ul>
+              <div className="mt-auto pt-6">
+                <CtaBtn href={PUBLIC_REPO_URL} external>
+                  <SiGithub className="size-4" aria-hidden />
+                  View on GitHub
+                </CtaBtn>
+              </div>
+            </div>
+
+            <div className="flex flex-col rounded-xl border border-border bg-card p-6">
               <h3 className="text-[1.375rem] font-bold sm:text-xl">Lite</h3>
               <p className="mt-3">
                 <span className="text-3xl font-bold tracking-tight">$9</span>{" "}
@@ -426,12 +525,12 @@ export default async function Page({
                 <li>See the AI&apos;s reason for every decision</li>
                 <li className="font-medium text-foreground">Twitter/X accounts — not included</li>
               </ul>
-              <div className="mt-6">
+              <div className="mt-auto pt-6">
                 <CtaBtn href="/signup">Get started</CtaBtn>
               </div>
             </div>
 
-            <div className="rounded-xl border border-primary/40 bg-card p-6 ring-1 ring-primary/20">
+            <div className="flex flex-col rounded-xl border border-primary/40 bg-card p-6 ring-1 ring-primary/20">
               <div className="flex items-center justify-between">
                 <h3 className="text-[1.375rem] font-bold sm:text-xl">Pro</h3>
                 <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-medium text-primary">
@@ -450,7 +549,7 @@ export default async function Page({
                 <li className="font-medium text-foreground">Twitter/X account parsing</li>
                 <li>30-day money-back guarantee</li>
               </ul>
-              <div className="mt-6">
+              <div className="mt-auto pt-6">
                 <CtaBtn href="/signup">Get started</CtaBtn>
               </div>
             </div>
@@ -461,8 +560,7 @@ export default async function Page({
             scale.
           </p>
           <p className="text-xs text-muted-foreground">
-            30-day money-back guarantee. No free tier: the filter only gets
-            better if you use it every day.
+            Lite and Pro come with a 30-day money-back guarantee.
           </p>
 
           {/* FAQ */}
@@ -492,6 +590,35 @@ export default async function Page({
             Your credentials are stored encrypted.
           </p>
 
+          <h3 className="mt-8 mb-2 text-[1.375rem] font-bold sm:text-xl">
+            Can I run Radaric on my own server?
+          </h3>
+          <p className="text-sm leading-relaxed">
+            Yes. The full code is{" "}
+            <a
+              href={PUBLIC_REPO_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="link"
+            >
+              on GitHub
+            </a>{" "}
+            under the Functional Source License (FSL-1.1). You can run it,
+            change it and use it inside your company for free, with your own AI
+            keys. The license forbids one thing: selling Radaric to others as a
+            competing hosted service. Two years after each release, that version
+            becomes Apache 2.0. The{" "}
+            <a
+              href={SELF_HOSTING_GUIDE_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="link"
+            >
+              self-hosting guide
+            </a>{" "}
+            walks you through setup with Docker Compose.
+          </p>
+
           <h3 className="mt-8 mb-2 text-[1.375rem] font-bold sm:text-xl">Who built this?</h3>
           <p className="text-sm leading-relaxed">
             Radaric is built by Kirill, the editor of Zhurnalus — a weekly
@@ -506,7 +633,18 @@ export default async function Page({
         </article>
 
         <footer className="mx-auto mt-20 max-w-[680px] border-t border-border pt-6 text-xs text-muted-foreground">
-          <p className="mb-3">Radaric © {new Date().getFullYear()}</p>
+          <p className="mb-3">
+            Radaric © {new Date().getFullYear()}. Open source under{" "}
+            <a
+              href={LICENSE_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="link"
+            >
+              FSL-1.1
+            </a>
+            .
+          </p>
           <nav className="flex flex-wrap gap-4">
             <Link href="/terms" className="link">
               Terms
@@ -517,6 +655,22 @@ export default async function Page({
             <Link href="/signup" prefetch={false} className="link">
               Log in
             </Link>
+            <a
+              href={PUBLIC_REPO_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="link"
+            >
+              GitHub
+            </a>
+            <a
+              href={SELF_HOSTING_GUIDE_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="link"
+            >
+              Self-hosting
+            </a>
             <a
               href={`mailto:${contactEmail}`}
               className="link"
