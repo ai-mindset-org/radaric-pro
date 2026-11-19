@@ -1,8 +1,372 @@
 {
  "source": "https://openrouter.ai/api/v1/models",
- "fetchedAt": "2026-09-15",
- "count": 445,
+ "fetchedAt": "2026-11-16",
+ "count": 468,
  "models": [
+  {
+   "id": "qwen/qwen4-max",
+   "structured_outputs": true
+  },
+  {
+   "id": "inclusionai/ling-3.2-flash:free",
+   "structured_outputs": true
+  },
+  {
+   "id": "google/gemini-4-hydrogen",
+   "structured_outputs": true
+  },
+  {
+   "id": "google/gemini-4-hydrogen:batch",
+   "structured_outputs": true
+  },
+  {
+   "id": "baidu/ernie-5.5-flash-preview:free",
+   "structured_outputs": true
+  },
+  {
+   "id": "baidu/ernie-light-dt-1.0-intl",
+   "structured_outputs": true
+  },
+  {
+   "id": "google/gemini-4-carbon",
+   "structured_outputs": true
+  },
+  {
+   "id": "google/gemini-4-carbon:batch",
+   "structured_outputs": true
+  },
+  {
+   "id": "nex-agi/nex-n2.6",
+   "structured_outputs": true
+  },
+  {
+   "id": "thinkingmachines/inkling-2-small",
+   "structured_outputs": true
+  },
+  {
+   "id": "thinkingmachines/inkling-2-small:free",
+   "structured_outputs": false
+  },
+  {
+   "id": "anthropic/claude-fable-5.2",
+   "structured_outputs": true
+  },
+  {
+   "id": "anthropic/claude-fable-5.2:batch",
+   "structured_outputs": true
+  },
+  {
+   "id": "meta/muse-ember",
+   "structured_outputs": true
+  },
+  {
+   "id": "liquid/lfm-3-1.7b",
+   "structured_outputs": true
+  },
+  {
+   "id": "liquid/lfm-3-1.7b:free",
+   "structured_outputs": true
+  },
+  {
+   "id": "google/gemini-omni-1.2-flash",
+   "structured_outputs": false
+  },
+  {
+   "id": "kt/midm-k-3.0-pro",
+   "structured_outputs": true
+  },
+  {
+   "id": "google/gemini-omni-1.1-flash",
+   "structured_outputs": false
+  },
+  {
+   "id": "ricursiveai/ripple-65b-preview",
+   "structured_outputs": true
+  },
+  {
+   "id": "tencent/hy4",
+   "structured_outputs": true
+  },
+  {
+   "id": "motif-technologies/motif-3",
+   "structured_outputs": true
+  },
+  {
+   "id": "z-ai/glm-5.3-flashx-legal",
+   "structured_outputs": true
+  },
+  {
+   "id": "particle-ai/particle-1",
+   "structured_outputs": true
+  },
+  {
+   "id": "particle-ai/particle-1:free",
+   "structured_outputs": true
+  },
+  {
+   "id": "openai/gpt-6.1-terra-pro",
+   "structured_outputs": true
+  },
+  {
+   "id": "openai/gpt-6.1-terra-pro:batch",
+   "structured_outputs": true
+  },
+  {
+   "id": "openai/gpt-6.1-terra",
+   "structured_outputs": true
+  },
+  {
+   "id": "openai/gpt-6.1-terra:batch",
+   "structured_outputs": true
+  },
+  {
+   "id": "moonshotai/kimi-k3.1-pro",
+   "structured_outputs": true
+  },
+  {
+   "id": "moonshotai/kimi-k3.1-pro:batch",
+   "structured_outputs": false
+  },
+  {
+   "id": "recursive/flint-v1.0:free",
+   "structured_outputs": false
+  },
+  {
+   "id": "minimax/minimax-m3.1-flash",
+   "structured_outputs": true
+  },
+  {
+   "id": "deepseek/deepseek-v4.1-flash-1017",
+   "structured_outputs": true
+  },
+  {
+   "id": "deepseek/deepseek-v4.1-flash-1017:batch",
+   "structured_outputs": true
+  },
+  {
+   "id": "elorian/glimpse",
+   "structured_outputs": true
+  },
+  {
+   "id": "reflection/beam-1.0-501b-a23b",
+   "structured_outputs": true
+  },
+  {
+   "id": "prism-ml/ternary-bonsai-2-9b",
+   "structured_outputs": true
+  },
+  {
+   "id": "moondream/moondream3-preview",
+   "structured_outputs": false
+  },
+  {
+   "id": "moondream/moondream3.1-9b-a2b",
+   "structured_outputs": false
+  },
+  {
+   "id": "meta/muse-spark-open",
+   "structured_outputs": true
+  },
+  {
+   "id": "nvidia/nemotron-3.5-super-vl",
+   "structured_outputs": true
+  },
+  {
+   "id": "nvidia/nemotron-3.5-super-vl:free",
+   "structured_outputs": true
+  },
+  {
+   "id": "unbiased/pareto-26.10",
+   "structured_outputs": false
+  },
+  {
+   "id": "~unbiased/pareto-latest",
+   "structured_outputs": false
+  },
+  {
+   "id": "unbiased/pareto-26.9",
+   "structured_outputs": false
+  },
+  {
+   "id": "liquid/lfm-2.5-24b-a2b",
+   "structured_outputs": true
+  },
+  {
+   "id": "google/gemini-4-argon",
+   "structured_outputs": true
+  },
+  {
+   "id": "google/gemini-4-argon:batch",
+   "structured_outputs": true
+  },
+  {
+   "id": "scaledown/summarize",
+   "structured_outputs": false
+  },
+  {
+   "id": "scaledown/extract",
+   "structured_outputs": false
+  },
+  {
+   "id": "meta/muse-wonder",
+   "structured_outputs": true
+  },
+  {
+   "id": "stepfun/step-5-preview",
+   "structured_outputs": true
+  },
+  {
+   "id": "anthropic/claude-haiku-5.5",
+   "structured_outputs": true
+  },
+  {
+   "id": "anthropic/claude-haiku-5.5:batch",
+   "structured_outputs": true
+  },
+  {
+   "id": "google/gemini-nano-banana-2.1",
+   "structured_outputs": true
+  },
+  {
+   "id": "mistralai/mistral-large-4-0",
+   "structured_outputs": true
+  },
+  {
+   "id": "inclusionai/ling-3.1-flash",
+   "structured_outputs": false
+  },
+  {
+   "id": "unbiased/pareto-26.10-preview",
+   "structured_outputs": false
+  },
+  {
+   "id": "openai/gpt-6.1-sol-pro",
+   "structured_outputs": true
+  },
+  {
+   "id": "openai/gpt-6.1-sol-pro:batch",
+   "structured_outputs": true
+  },
+  {
+   "id": "openai/gpt-6.1-sol",
+   "structured_outputs": true
+  },
+  {
+   "id": "openai/gpt-6.1-sol:batch",
+   "structured_outputs": true
+  },
+  {
+   "id": "anthropic/claude-sonnet-5.5",
+   "structured_outputs": true
+  },
+  {
+   "id": "anthropic/claude-sonnet-5.5:batch",
+   "structured_outputs": true
+  },
+  {
+   "id": "perceptron/perceptron-mk1.5",
+   "structured_outputs": true
+  },
+  {
+   "id": "fireworks/ember-1",
+   "structured_outputs": true
+  },
+  {
+   "id": "z-ai/glm-5.3-prime",
+   "structured_outputs": false
+  },
+  {
+   "id": "qwen/qwen3.8-max-prime",
+   "structured_outputs": true
+  },
+  {
+   "id": "aion-labs/aion-3.5-mini",
+   "structured_outputs": false
+  },
+  {
+   "id": "aion-labs/aion-3.5",
+   "structured_outputs": false
+  },
+  {
+   "id": "upstage/solar-mini4",
+   "structured_outputs": true
+  },
+  {
+   "id": "cohere/command-a-plus",
+   "structured_outputs": true
+  },
+  {
+   "id": "openai/gpt-6-luna-pro",
+   "structured_outputs": true
+  },
+  {
+   "id": "openai/gpt-6-luna-pro:batch",
+   "structured_outputs": true
+  },
+  {
+   "id": "openai/gpt-6-luna",
+   "structured_outputs": true
+  },
+  {
+   "id": "openai/gpt-6-luna:batch",
+   "structured_outputs": true
+  },
+  {
+   "id": "openai/gpt-6-sol-pro",
+   "structured_outputs": true
+  },
+  {
+   "id": "openai/gpt-6-sol-pro:batch",
+   "structured_outputs": true
+  },
+  {
+   "id": "openai/gpt-6-sol",
+   "structured_outputs": true
+  },
+  {
+   "id": "openai/gpt-6-sol:batch",
+   "structured_outputs": true
+  },
+  {
+   "id": "anthropic/claude-opus-5.5",
+   "structured_outputs": true
+  },
+  {
+   "id": "anthropic/claude-opus-5.5:batch",
+   "structured_outputs": true
+  },
+  {
+   "id": "xiaomi/mimo-v2.6-pro-ultraspeed",
+   "structured_outputs": true
+  },
+  {
+   "id": "xiaomi/mimo-v2.6-flash",
+   "structured_outputs": true
+  },
+  {
+   "id": "xiaomi/mimo-v2.6-pro",
+   "structured_outputs": true
+  },
+  {
+   "id": "x-ai/grok-4.7",
+   "structured_outputs": true
+  },
+  {
+   "id": "x-ai/grok-4.7:batch",
+   "structured_outputs": true
+  },
+  {
+   "id": "qwen/qwen3.8-omni-flash",
+   "structured_outputs": true
+  },
+  {
+   "id": "prism-ml/ternary-bonsai-2-27b",
+   "structured_outputs": true
+  },
+  {
+   "id": "z-ai/glm-5.3-flashx",
+   "structured_outputs": true
+  },
   {
    "id": "~deepseek/deepseek-pro-latest",
    "structured_outputs": true
@@ -48,23 +412,19 @@
    "structured_outputs": true
   },
   {
-   "id": "inclusionai/ling-3.0-flash-vl:free",
-   "structured_outputs": false
-  },
-  {
    "id": "deepseek/deepseek-v4.1-flash",
    "structured_outputs": true
   },
   {
-   "id": "inception/mercury-2.5",
+   "id": "deepseek/deepseek-v4.1-flash:batch",
    "structured_outputs": true
   },
   {
-   "id": "nex-agi/nex-n2.5-mini:free",
+   "id": "nex-agi/nex-n2.5-mini",
    "structured_outputs": true
   },
   {
-   "id": "nex-agi/nex-n2.5-pro:free",
+   "id": "nex-agi/nex-n2.5-pro",
    "structured_outputs": true
   },
   {
@@ -84,11 +444,11 @@
    "structured_outputs": true
   },
   {
-   "id": "inclusionai/ling-3.0-flash-sante:free",
-   "structured_outputs": false
+   "id": "qwen/qwen3.8-max-0902",
+   "structured_outputs": true
   },
   {
-   "id": "qwen/qwen3.8-max-0902",
+   "id": "qwen/qwen3.8-max-0902:batch",
    "structured_outputs": true
   },
   {
@@ -124,14 +484,6 @@
    "structured_outputs": true
   },
   {
-   "id": "inclusionai/ling-3.0-flash-fin",
-   "structured_outputs": true
-  },
-  {
-   "id": "inclusionai/ling-3.0-flash-fin:free",
-   "structured_outputs": false
-  },
-  {
    "id": "~z-ai/glm-flash-latest",
    "structured_outputs": true
   },
@@ -153,10 +505,6 @@
   },
   {
    "id": "deepseek/deepseek-v4-flash-vision-exp",
-   "structured_outputs": true
-  },
-  {
-   "id": "deepseek/deepseek-v4-flash-vision-exp:batch",
    "structured_outputs": true
   },
   {
@@ -188,6 +536,10 @@
    "structured_outputs": true
   },
   {
+   "id": "qwen/qwen3.8-27b:batch",
+   "structured_outputs": true
+  },
+  {
    "id": "dots-studio/dots-3-note-preview:free",
    "structured_outputs": true
   },
@@ -208,19 +560,7 @@
    "structured_outputs": true
   },
   {
-   "id": "qwen/qwen3.8-2.4t-a95b:batch",
-   "structured_outputs": true
-  },
-  {
-   "id": "bytedance-seed/seed-2.0-code",
-   "structured_outputs": true
-  },
-  {
    "id": "deepseek/deepseek-v4-pro-0813",
-   "structured_outputs": true
-  },
-  {
-   "id": "deepseek/deepseek-v4-pro-0813:batch",
    "structured_outputs": true
   },
   {
@@ -228,7 +568,7 @@
    "structured_outputs": true
   },
   {
-   "id": "liquid/lfm-2.5-2.6b:free",
+   "id": "x-ai/grok-4.6:batch",
    "structured_outputs": true
   },
   {
@@ -256,6 +596,10 @@
    "structured_outputs": true
   },
   {
+   "id": "inclusionai/ling-3.0-tiny",
+   "structured_outputs": true
+  },
+  {
    "id": "meta/muse-spark-1.2",
    "structured_outputs": true
   },
@@ -280,10 +624,6 @@
    "structured_outputs": false
   },
   {
-   "id": "thinkingmachines/inkling-small:free",
-   "structured_outputs": false
-  },
-  {
    "id": "qwen/qwen3.7-flash",
    "structured_outputs": false
   },
@@ -297,14 +637,6 @@
   },
   {
    "id": "inclusionai/ling-3.0-flash",
-   "structured_outputs": false
-  },
-  {
-   "id": "poolside/laguna-s-2.1",
-   "structured_outputs": false
-  },
-  {
-   "id": "poolside/laguna-s-2.1:free",
    "structured_outputs": false
   },
   {
@@ -332,18 +664,6 @@
    "structured_outputs": false
   },
   {
-   "id": "thinkingmachines/inkling:batch",
-   "structured_outputs": false
-  },
-  {
-   "id": "thinkingmachines/inkling:free",
-   "structured_outputs": false
-  },
-  {
-   "id": "openrouter/auto-beta",
-   "structured_outputs": true
-  },
-  {
    "id": "moonshotai/kimi-k3",
    "structured_outputs": true
   },
@@ -353,10 +673,6 @@
   },
   {
    "id": "meta/muse-spark-1.1",
-   "structured_outputs": true
-  },
-  {
-   "id": "kwaipilot/kat-coder-pro-v2.5",
    "structured_outputs": true
   },
   {
@@ -428,14 +744,6 @@
    "structured_outputs": true
   },
   {
-   "id": "poolside/laguna-xs-2.1",
-   "structured_outputs": false
-  },
-  {
-   "id": "poolside/laguna-xs-2.1:free",
-   "structured_outputs": false
-  },
-  {
    "id": "anthropic/claude-sonnet-5",
    "structured_outputs": true
   },
@@ -468,14 +776,6 @@
    "structured_outputs": true
   },
   {
-   "id": "z-ai/glm-5.2:batch",
-   "structured_outputs": true
-  },
-  {
-   "id": "openrouter/fusion",
-   "structured_outputs": false
-  },
-  {
    "id": "moonshotai/kimi-k2.7-code",
    "structured_outputs": true
   },
@@ -496,10 +796,6 @@
    "structured_outputs": false
   },
   {
-   "id": "nvidia/nemotron-3.5-content-safety:free",
-   "structured_outputs": false
-  },
-  {
    "id": "nvidia/nemotron-3-ultra-550b-a55b",
    "structured_outputs": true
   },
@@ -512,12 +808,16 @@
    "structured_outputs": true
   },
   {
+   "id": "qwen/qwen3.7-plus:batch",
+   "structured_outputs": true
+  },
+  {
    "id": "minimax/minimax-m3",
    "structured_outputs": true
   },
   {
    "id": "minimax/minimax-m3:batch",
-   "structured_outputs": true
+   "structured_outputs": false
   },
   {
    "id": "stepfun/step-3.7-flash",
@@ -620,10 +920,6 @@
    "structured_outputs": true
   },
   {
-   "id": "qwen/qwen3.6-max-preview",
-   "structured_outputs": true
-  },
-  {
    "id": "qwen/qwen3.6-27b",
    "structured_outputs": true
   },
@@ -672,10 +968,6 @@
    "structured_outputs": true
   },
   {
-   "id": "openrouter/pareto-code",
-   "structured_outputs": false
-  },
-  {
    "id": "moonshotai/kimi-k2.6",
    "structured_outputs": true
   },
@@ -704,10 +996,6 @@
    "structured_outputs": true
   },
   {
-   "id": "google/gemma-4-31b-it:batch",
-   "structured_outputs": true
-  },
-  {
    "id": "google/gemma-4-31b-it:free",
    "structured_outputs": false
   },
@@ -717,10 +1005,6 @@
   },
   {
    "id": "z-ai/glm-5v-turbo",
-   "structured_outputs": false
-  },
-  {
-   "id": "arcee-ai/trinity-large-thinking",
    "structured_outputs": false
   },
   {
@@ -740,16 +1024,12 @@
    "structured_outputs": false
   },
   {
-   "id": "kwaipilot/kat-coder-pro-v2",
-   "structured_outputs": true
-  },
-  {
    "id": "rekaai/reka-edge",
    "structured_outputs": true
   },
   {
    "id": "minimax/minimax-m2.7",
-   "structured_outputs": true
+   "structured_outputs": false
   },
   {
    "id": "openai/gpt-5.4-nano",
@@ -772,10 +1052,6 @@
    "structured_outputs": true
   },
   {
-   "id": "mistralai/mistral-small-2603:batch",
-   "structured_outputs": true
-  },
-  {
    "id": "z-ai/glm-5-turbo",
    "structured_outputs": false
   },
@@ -784,19 +1060,11 @@
    "structured_outputs": true
   },
   {
-   "id": "nvidia/nemotron-3-super-120b-a12b:free",
-   "structured_outputs": true
-  },
-  {
    "id": "bytedance-seed/seed-2.0-lite",
    "structured_outputs": true
   },
   {
    "id": "qwen/qwen3.5-9b",
-   "structured_outputs": true
-  },
-  {
-   "id": "qwen/qwen3.5-9b:batch",
    "structured_outputs": true
   },
   {
@@ -813,10 +1081,6 @@
   },
   {
    "id": "openai/gpt-5.4:batch",
-   "structured_outputs": true
-  },
-  {
-   "id": "inception/mercury-2",
    "structured_outputs": true
   },
   {
@@ -892,10 +1156,6 @@
    "structured_outputs": true
   },
   {
-   "id": "qwen/qwen3-max-thinking",
-   "structured_outputs": true
-  },
-  {
    "id": "anthropic/claude-opus-4.6",
    "structured_outputs": true
   },
@@ -908,24 +1168,8 @@
    "structured_outputs": true
   },
   {
-   "id": "openrouter/free",
-   "structured_outputs": true
-  },
-  {
-   "id": "stepfun/step-3.5-flash",
-   "structured_outputs": false
-  },
-  {
    "id": "moonshotai/kimi-k2.5",
    "structured_outputs": true
-  },
-  {
-   "id": "upstage/solar-pro-3",
-   "structured_outputs": true
-  },
-  {
-   "id": "minimax/minimax-m2-her",
-   "structured_outputs": false
   },
   {
    "id": "writer/palmyra-x5",
@@ -946,18 +1190,6 @@
   {
    "id": "openai/gpt-5.2-codex",
    "structured_outputs": true
-  },
-  {
-   "id": "bytedance-seed/seed-1.6-flash",
-   "structured_outputs": true
-  },
-  {
-   "id": "bytedance-seed/seed-1.6",
-   "structured_outputs": true
-  },
-  {
-   "id": "minimax/minimax-m2.1",
-   "structured_outputs": false
   },
   {
    "id": "z-ai/glm-4.7",
@@ -1008,10 +1240,6 @@
    "structured_outputs": false
   },
   {
-   "id": "openrouter/bodybuilder",
-   "structured_outputs": false
-  },
-  {
    "id": "openai/gpt-5.1-codex-max",
    "structured_outputs": true
   },
@@ -1028,19 +1256,11 @@
    "structured_outputs": true
   },
   {
-   "id": "mistralai/ministral-8b-2512:batch",
-   "structured_outputs": true
-  },
-  {
    "id": "mistralai/ministral-3b-2512",
    "structured_outputs": true
   },
   {
    "id": "mistralai/mistral-large-2512",
-   "structured_outputs": true
-  },
-  {
-   "id": "mistralai/mistral-large-2512:batch",
    "structured_outputs": true
   },
   {
@@ -1096,18 +1316,6 @@
    "structured_outputs": true
   },
   {
-   "id": "minimax/minimax-m2",
-   "structured_outputs": true
-  },
-  {
-   "id": "qwen/qwen3-vl-32b-instruct",
-   "structured_outputs": true
-  },
-  {
-   "id": "ibm-granite/granite-4.0-h-micro",
-   "structured_outputs": false
-  },
-  {
    "id": "openai/gpt-5-image-mini",
    "structured_outputs": true
   },
@@ -1120,10 +1328,6 @@
    "structured_outputs": true
   },
   {
-   "id": "qwen/qwen3-vl-8b-thinking",
-   "structured_outputs": true
-  },
-  {
    "id": "qwen/qwen3-vl-8b-instruct",
    "structured_outputs": true
   },
@@ -1133,10 +1337,6 @@
   },
   {
    "id": "google/gemini-2.5-flash-image",
-   "structured_outputs": true
-  },
-  {
-   "id": "qwen/qwen3-vl-30b-a3b-thinking",
    "structured_outputs": true
   },
   {
@@ -1176,19 +1376,7 @@
    "structured_outputs": false
   },
   {
-   "id": "qwen/qwen3-vl-235b-a22b-thinking",
-   "structured_outputs": true
-  },
-  {
    "id": "qwen/qwen3-vl-235b-a22b-instruct",
-   "structured_outputs": true
-  },
-  {
-   "id": "qwen/qwen3-max",
-   "structured_outputs": true
-  },
-  {
-   "id": "qwen/qwen3-coder-plus",
    "structured_outputs": true
   },
   {
@@ -1200,15 +1388,7 @@
    "structured_outputs": false
   },
   {
-   "id": "qwen/qwen3-next-80b-a3b-thinking",
-   "structured_outputs": true
-  },
-  {
    "id": "qwen/qwen3-next-80b-a3b-instruct",
-   "structured_outputs": true
-  },
-  {
-   "id": "qwen/qwen-plus-2025-07-28",
    "structured_outputs": true
   },
   {
@@ -1216,12 +1396,8 @@
    "structured_outputs": true
   },
   {
-   "id": "qwen/qwen3-30b-a3b-thinking-2507",
-   "structured_outputs": false
-  },
-  {
    "id": "nousresearch/hermes-4-405b",
-   "structured_outputs": false
+   "structured_outputs": true
   },
   {
    "id": "deepseek/deepseek-chat-v3.1",
@@ -1229,10 +1405,6 @@
   },
   {
    "id": "mistralai/mistral-medium-3.1",
-   "structured_outputs": true
-  },
-  {
-   "id": "mistralai/mistral-medium-3.1:batch",
    "structured_outputs": true
   },
   {
@@ -1292,12 +1464,8 @@
    "structured_outputs": true
   },
   {
-   "id": "mistralai/codestral-2508:batch",
-   "structured_outputs": true
-  },
-  {
    "id": "qwen/qwen3-coder-30b-a3b-instruct",
-   "structured_outputs": true
+   "structured_outputs": false
   },
   {
    "id": "qwen/qwen3-30b-a3b-instruct-2507",
@@ -1328,10 +1496,6 @@
    "structured_outputs": true
   },
   {
-   "id": "google/gemini-2.5-flash-lite:batch",
-   "structured_outputs": true
-  },
-  {
    "id": "qwen/qwen3-235b-a22b-2507",
    "structured_outputs": true
   },
@@ -1344,19 +1508,19 @@
    "structured_outputs": false
   },
   {
-   "id": "tencent/hunyuan-a13b-instruct",
-   "structured_outputs": true
-  },
-  {
    "id": "morph/morph-v3-large",
    "structured_outputs": true
   },
   {
-   "id": "morph/morph-v3-fast",
-   "structured_outputs": false
+   "id": "morph/morph-v3-large:batch",
+   "structured_outputs": true
   },
   {
-   "id": "baidu/ernie-4.5-vl-424b-a47b",
+   "id": "morph/morph-v3-fast",
+   "structured_outputs": true
+  },
+  {
+   "id": "morph/morph-v3-fast:batch",
    "structured_outputs": false
   },
   {
@@ -1364,23 +1528,11 @@
    "structured_outputs": true
   },
   {
-   "id": "minimax/minimax-m1",
-   "structured_outputs": false
-  },
-  {
    "id": "google/gemini-2.5-flash",
    "structured_outputs": true
   },
   {
-   "id": "google/gemini-2.5-flash:batch",
-   "structured_outputs": true
-  },
-  {
    "id": "google/gemini-2.5-pro",
-   "structured_outputs": true
-  },
-  {
-   "id": "google/gemini-2.5-pro:batch",
    "structured_outputs": true
   },
   {
@@ -1396,14 +1548,6 @@
    "structured_outputs": true
   },
   {
-   "id": "anthropic/claude-opus-4",
-   "structured_outputs": false
-  },
-  {
-   "id": "anthropic/claude-sonnet-4",
-   "structured_outputs": false
-  },
-  {
    "id": "mistralai/mistral-medium-3",
    "structured_outputs": true
   },
@@ -1416,10 +1560,6 @@
    "structured_outputs": true
   },
   {
-   "id": "qwen/qwen3-8b",
-   "structured_outputs": false
-  },
-  {
    "id": "qwen/qwen3-14b",
    "structured_outputs": true
   },
@@ -1428,23 +1568,11 @@
    "structured_outputs": true
   },
   {
-   "id": "qwen/qwen3-235b-a22b",
-   "structured_outputs": false
-  },
-  {
-   "id": "openai/o4-mini-high",
-   "structured_outputs": true
-  },
-  {
    "id": "openai/o3",
    "structured_outputs": true
   },
   {
    "id": "openai/o3:batch",
-   "structured_outputs": true
-  },
-  {
-   "id": "openai/o4-mini",
    "structured_outputs": true
   },
   {
@@ -1488,12 +1616,8 @@
    "structured_outputs": true
   },
   {
-   "id": "openai/o1-pro",
-   "structured_outputs": true
-  },
-  {
    "id": "mistralai/mistral-small-3.1-24b-instruct",
-   "structured_outputs": false
+   "structured_outputs": true
   },
   {
    "id": "google/gemma-3-4b-it",
@@ -1536,10 +1660,6 @@
    "structured_outputs": true
   },
   {
-   "id": "openai/o3-mini-high",
-   "structured_outputs": true
-  },
-  {
    "id": "aion-labs/aion-rp-llama-3.1-8b",
    "structured_outputs": false
   },
@@ -1549,10 +1669,6 @@
   },
   {
    "id": "qwen/qwen-plus",
-   "structured_outputs": true
-  },
-  {
-   "id": "openai/o3-mini",
    "structured_outputs": true
   },
   {
@@ -1568,31 +1684,11 @@
    "structured_outputs": false
   },
   {
-   "id": "deepseek/deepseek-r1-distill-llama-70b",
-   "structured_outputs": false
-  },
-  {
-   "id": "deepseek/deepseek-r1",
-   "structured_outputs": false
-  },
-  {
-   "id": "minimax/minimax-01",
-   "structured_outputs": false
-  },
-  {
    "id": "microsoft/phi-4",
    "structured_outputs": true
   },
   {
    "id": "deepseek/deepseek-chat",
-   "structured_outputs": true
-  },
-  {
-   "id": "sao10k/l3.3-euryale-70b",
-   "structured_outputs": true
-  },
-  {
-   "id": "openai/o1",
    "structured_outputs": true
   },
   {
@@ -1636,10 +1732,6 @@
    "structured_outputs": true
   },
   {
-   "id": "qwen/qwen-2.5-7b-instruct",
-   "structured_outputs": true
-  },
-  {
    "id": "meta-llama/llama-3.2-1b-instruct",
    "structured_outputs": false
   },
@@ -1664,14 +1756,6 @@
    "structured_outputs": true
   },
   {
-   "id": "nousresearch/hermes-3-llama-3.1-70b",
-   "structured_outputs": true
-  },
-  {
-   "id": "nousresearch/hermes-3-llama-3.1-405b",
-   "structured_outputs": true
-  },
-  {
    "id": "sao10k/l3-lunaris-8b",
    "structured_outputs": true
   },
@@ -1681,7 +1765,7 @@
   },
   {
    "id": "meta-llama/llama-3.1-70b-instruct",
-   "structured_outputs": true
+   "structured_outputs": false
   },
   {
    "id": "meta-llama/llama-3.1-8b-instruct",
@@ -1724,20 +1808,8 @@
    "structured_outputs": true
   },
   {
-   "id": "microsoft/wizardlm-2-8x22b",
-   "structured_outputs": false
-  },
-  {
-   "id": "openai/gpt-4-turbo",
-   "structured_outputs": true
-  },
-  {
    "id": "openai/gpt-4-turbo:batch",
    "structured_outputs": true
-  },
-  {
-   "id": "anthropic/claude-3-haiku",
-   "structured_outputs": false
   },
   {
    "id": "mistralai/mistral-large",
@@ -1745,14 +1817,6 @@
   },
   {
    "id": "openai/gpt-3.5-turbo-0613",
-   "structured_outputs": true
-  },
-  {
-   "id": "openrouter/auto",
-   "structured_outputs": true
-  },
-  {
-   "id": "openai/gpt-3.5-turbo-instruct",
    "structured_outputs": true
   },
   {
@@ -1772,16 +1836,44 @@
    "structured_outputs": true
   },
   {
-   "id": "openai/gpt-3.5-turbo",
-   "structured_outputs": true
-  },
-  {
-   "id": "openai/gpt-3.5-turbo:batch",
-   "structured_outputs": true
-  },
-  {
    "id": "openai/gpt-4",
+   "structured_outputs": false
+  },
+  {
+   "id": "openrouter/auto",
    "structured_outputs": true
+  },
+  {
+   "id": "openrouter/auto-code",
+   "structured_outputs": true
+  },
+  {
+   "id": "typesafe/jev-router",
+   "structured_outputs": true
+  },
+  {
+   "id": "nvidia/switchyard",
+   "structured_outputs": false
+  },
+  {
+   "id": "openrouter/auto-beta",
+   "structured_outputs": true
+  },
+  {
+   "id": "openrouter/fusion",
+   "structured_outputs": false
+  },
+  {
+   "id": "openrouter/pareto-code",
+   "structured_outputs": true
+  },
+  {
+   "id": "openrouter/free",
+   "structured_outputs": true
+  },
+  {
+   "id": "openrouter/bodybuilder",
+   "structured_outputs": false
   }
  ]
 }

@@ -8,6 +8,11 @@ The license covers the code, not the name: describe your instance as
 the Radaric service itself and don't use the logo or the `radaric.pro` domain —
 see [NOTICE](NOTICE).
 
+The code is under AGPL-3.0. Running it unchanged adds no obligation. If you
+modify it and other people use your instance over the network, colleagues
+included, section 13 of the license requires you to offer them the complete
+source of your modified version, for example with a link to your fork.
+
 ## Quick start (Docker)
 
 Requires Docker with the Compose plugin. From the repository root, generate its

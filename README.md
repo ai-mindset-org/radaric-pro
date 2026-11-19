@@ -4,8 +4,8 @@ An intelligent assistant for content curators. Radaric collects items from
 hundreds of sources, filters them against your own editorial criteria with AI,
 groups matching posts into stories, and learns continuously from your feedback.
 
-Source-available: read, run, modify and self-host it (including inside a
-company). You may not sell a competing hosted service — see [License](#license).
+Open source under AGPL-3.0: read, run, modify and self-host it, including
+inside a company — see [License](#license).
 
 ## What it does
 
@@ -130,8 +130,9 @@ the license and self-hosting docs.
 
 ## License
 
-**Source-available, not open source.** The code is licensed under
-[FSL-1.1-ALv2](LICENSE): you can read it, run it, modify it and host it
-yourself — including inside a company — but you may not offer a competing
-service. The brand and the `radaric.pro` domain are not covered by the license;
+Open source under the [GNU Affero General Public License v3.0](LICENSE)
+(AGPL-3.0-only). You can read, run, modify and host the code yourself,
+including inside a company. If you change it and let other people use your
+instance over a network, section 13 of the license requires you to offer them
+the complete source of your modified version. The brand and the `radaric.pro` domain are not covered by the license;
 see [NOTICE](NOTICE).

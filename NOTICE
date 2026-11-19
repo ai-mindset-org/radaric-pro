@@ -1,35 +1,49 @@
 Radaric
 Copyright 2026 Kirill Oleinichenko
 
-This product is licensed under the Functional Source License, Version 1.1, ALv2
-Future License (FSL-1.1-ALv2). See LICENSE.
+This product is free software: you can redistribute it and/or modify it under
+the terms of the GNU Affero General Public License, version 3 only
+(SPDX: AGPL-3.0-only), as published by the Free Software Foundation. See
+LICENSE.
 
-It is **source-available**, not open source: FSL is not an OSI-approved
-license. You may read, run, modify and self-host the code — including inside a
-company — but you may not offer it to others as a commercial product or service
-that competes with Radaric (see "Permitted Purpose" in LICENSE).
+It is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
 
-## Future license (the Change Date)
+If you modify the code and let people use it over a network, section 13 of the
+license requires you to offer those users the source of your modified version.
 
-FSL is per-version. Each version of the Software becomes available under the
-Apache License, Version 2.0 on the second anniversary (the "Change Date") of
-the date that version is first made available under FSL.
+## Earlier releases
 
-- First public release: **2026-11-18**; its Change Date is **2028-11-18**.
-- Subsequent releases restate their Change Date in the release notes
-  (`docs/CHANGELOG.md`) when they are published.
+Two public releases of github.com/kirillgreen/radaric-pro were licensed under
+the Functional Source License, Version 1.1, ALv2 Future License (FSL-1.1-ALv2):
+
+- commit `cb3ac6a`, published 2026-11-18; its Change Date is 2028-11-18;
+- commit `222c337`, published 2026-11-19; its Change Date is 2028-11-19.
+
+Anyone who received them keeps the rights FSL granted for them, including the
+Apache License, Version 2.0 grant that takes effect on each Change Date. Every
+commit after `222c337` is licensed under AGPL-3.0-only.
 
 ## Trademarks
 
 "Radaric", the Radaric logo and the domain `radaric.pro` are trademarks of the
-licensor. The FSL covers the **code**, not the name or the marks: a self-hosted
-or modified instance must not present itself as "Radaric" or imply endorsement,
-and may not use the logo or domain without written permission. Describing your
-instance as "a Radaric instance" or "based on Radaric" is fine.
+licensor. As additional terms under section 7 of the AGPL:
+
+- under section 7(e), this license grants no rights under trademark law to the
+  name "Radaric", the Radaric logo or the domain `radaric.pro`;
+- under section 7(c), a modified version must not present itself as "Radaric"
+  or imply the licensor's endorsement, and must be marked as different from
+  the original.
+
+The brand image files `app/icon.png`, `app/apple-icon.png` and
+`public/og-image.png` are not covered by the AGPL: replace them in an instance
+you run for others. Describing your instance as "a Radaric instance" or "based
+on Radaric" is fine.
 
 ## Third-party fonts
 
-The font files under `app/fonts/` are not covered by the FSL. Each is
+The font files under `app/fonts/` are not covered by the AGPL. Each is
 distributed under the SIL Open Font License, Version 1.1, whose text sits next
 to it as `OFL.txt`; versions, upstream URLs and hashes are in
 `app/fonts/SOURCES.md`.

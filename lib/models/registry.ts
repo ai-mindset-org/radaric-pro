@@ -50,7 +50,8 @@ export interface ModelOption {
 // ---------------------------------------------------------------------------
 // Catalogue
 //
-// Prices and scores surveyed 2026-09-09 against https://openrouter.ai/api/v1/models.
+// Prices and scores surveyed 2026-09-09 against https://openrouter.ai/api/v1/models;
+// entries added on 2026-11-16 carry that day's figures.
 // They exist to inform the Settings dropdown and to document why the defaults are
 // what they are; nothing routes on them, so drift costs a stale label, not a bug.
 // ---------------------------------------------------------------------------
@@ -73,7 +74,10 @@ export const OPENROUTER_MODELS: ModelOption[] = [
   { id: "z-ai/glm-5.3-flash", label: "GLM-5.3 Flash", score: 41.9, priceIn: 0.07, priceOut: 0.25, supportsReasoningEffort: true },
   { id: "deepseek/deepseek-v4-flash-0731", label: "DeepSeek V4 Flash", score: 34.5, priceIn: 0.07, priceOut: 0.18, supportsReasoningEffort: true },
   { id: "deepseek/deepseek-v4.1-flash", label: "DeepSeek V4.1 Flash", score: 39.5, priceIn: 0.15, priceOut: 0.6, supportsReasoningEffort: true },
+  { id: "deepseek/deepseek-v4.1-flash-1017", label: "DeepSeek V4.1 Flash 1017", score: 28.6, priceIn: 0.15, priceOut: 0.6, supportsReasoningEffort: true },
   { id: "openai/gpt-5.6-luna", label: "GPT-5.6 Luna", score: 37.5, priceIn: 0.2, priceOut: 1.2, supportsReasoningEffort: true },
+  { id: "anthropic/claude-haiku-5.5", label: "Claude Haiku 5.5 (via OpenRouter)", score: 36.5, priceIn: 0.1, priceOut: 0.5, supportsReasoningEffort: true },
+  { id: "openai/gpt-6-luna", label: "GPT-6 Luna", score: 27.9, priceIn: 0.1, priceOut: 0.5, supportsReasoningEffort: true },
   // --- Mid tier ---
   { id: "deepseek/deepseek-v4-pro-0813", label: "DeepSeek V4 Pro", score: 36.3, priceIn: 0.58, priceOut: 1.74, supportsReasoningEffort: true },
   { id: "qwen/qwen3.8-27b", label: "Qwen 3.8 27B", score: 33.9, priceIn: 0.42, priceOut: 3, supportsReasoningEffort: true },
@@ -93,12 +97,16 @@ export const OPENROUTER_MODELS: ModelOption[] = [
   { id: "x-ai/grok-4.6", label: "Grok 4.6", score: 44.4, priceIn: 2, priceOut: 6, supportsReasoningEffort: true },
   { id: "qwen/qwen3.8-max-0902", label: "Qwen 3.8 Max", score: 40.3, priceIn: 2, priceOut: 6, supportsReasoningEffort: true },
   { id: "openai/gpt-5.6-sol", label: "GPT-5.6 Sol", score: 47.1, priceIn: 2, priceOut: 10, supportsReasoningEffort: true },
+  { id: "openai/gpt-6.1-sol", label: "GPT-6.1 Sol", score: 54.6, priceIn: 2, priceOut: 10, supportsReasoningEffort: true },
   { id: "moonshotai/kimi-k3", label: "Kimi K3", score: 43.8, priceIn: 3, priceOut: 15, supportsReasoningEffort: true },
+  { id: "anthropic/claude-opus-5.5", label: "Claude Opus 5.5 (via OpenRouter)", score: 59.1, priceIn: 4, priceOut: 20, supportsReasoningEffort: true },
+  { id: "anthropic/claude-sonnet-5.5", label: "Claude Sonnet 5.5 (via OpenRouter)", score: 54.5, priceIn: 2, priceOut: 10, supportsReasoningEffort: true },
   { id: "anthropic/claude-opus-5", label: "Claude Opus 5 (via OpenRouter)", score: 50.7, priceIn: 5, priceOut: 25, supportsReasoningEffort: true },
   { id: "anthropic/claude-sonnet-5", label: "Claude Sonnet 5 (via OpenRouter)", score: 38.4, priceIn: 2, priceOut: 10, supportsReasoningEffort: true },
   { id: "anthropic/claude-sonnet-4.6", label: "Claude Sonnet 4.6 (via OpenRouter)", score: 30.5, priceIn: 3, priceOut: 15, supportsReasoningEffort: true },
   { id: "anthropic/claude-haiku-4.5", label: "Claude Haiku 4.5 (via OpenRouter)", score: 17.6, priceIn: 1, priceOut: 5 },
   { id: "anthropic/claude-fable-5.1", label: "Claude Fable 5.1 (via OpenRouter)", score: 53.4, priceIn: 10, priceOut: 50, supportsReasoningEffort: true },
+  { id: "anthropic/claude-fable-5.2", label: "Claude Fable 5.2 (via OpenRouter)", score: 64.6, priceIn: 8, priceOut: 40, supportsReasoningEffort: true },
 ]
 
 const MODELS_BY_ID: ReadonlyMap<string, ModelOption> = new Map(

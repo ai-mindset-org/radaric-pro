@@ -490,9 +490,8 @@ export default async function Page({
                     rel="noreferrer"
                     className="link whitespace-nowrap"
                   >
-                    FSL-1.1
+                    AGPL-3.0
                   </a>
-                  ; reselling it as a hosted service is not allowed
                 </li>
               </ul>
               <div className="mt-auto pt-6">
@@ -603,11 +602,11 @@ export default async function Page({
             >
               on GitHub
             </a>{" "}
-            under the Functional Source License (FSL-1.1). You can run it,
-            change it and use it inside your company for free, with your own AI
-            keys. The license forbids one thing: selling Radaric to others as a
-            competing hosted service. Two years after each release, that version
-            becomes Apache 2.0. The{" "}
+            under the GNU Affero General Public License (AGPL-3.0). You can run
+            it, change it and use it inside your company for free, with your own
+            AI keys. If you change the code and run it for other people,
+            colleagues included, the license requires you to offer them the
+            source of your version. The{" "}
             <a
               href={SELF_HOSTING_GUIDE_URL}
               target="_blank"
@@ -641,7 +640,7 @@ export default async function Page({
               rel="noreferrer"
               className="link"
             >
-              FSL-1.1
+              AGPL-3.0
             </a>
             .
           </p>

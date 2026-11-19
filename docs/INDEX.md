@@ -54,6 +54,6 @@
 
 | Doc | Contents |
 |---|---|
-| [LICENSE](../LICENSE) | FSL-1.1-ALv2 |
-| [NOTICE](../NOTICE) | Brand boundary: the FSL covers the code, not the brand |
+| [LICENSE](../LICENSE) | AGPL-3.0-only |
+| [NOTICE](../NOTICE) | Copyright, the earlier releases and their license, the brand terms, third-party notices |
 | [CLA.md](../.github/CLA.md) | Contributor License Agreement (draft — signing not open yet) |

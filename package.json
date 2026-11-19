@@ -110,5 +110,5 @@
     "typescript": "^5",
     "vitest": "^4.1.12"
   },
-  "license": "FSL-1.1-ALv2"
+  "license": "AGPL-3.0-only"
 }
